@@ -1,0 +1,6 @@
+package config
+
+const (
+	ACCESS_TOKEN_KEY  = "ACCESS_TOKEN"
+	REFRESH_TOKEN_KEY = "REFRESH_TOKEN"
+)
