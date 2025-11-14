@@ -37,3 +37,10 @@ func HandleSignupError(err error, rp *reply.Reply) error {
 	}
 	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 }
+
+func HandleValidateAuthError(err error, rp *reply.Reply) error {
+	if errors.Is(err, ErrTokenExpired) || errors.Is(err, ErrInvalidToken) {
+		return rp.Error(replylib.CodeUnauthorized, err.Error()).FailJSON()
+	}
+	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+}

@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"user-service/config"
+	"user-service/db/revoked"
 	"user-service/db/user"
 
 	"gorm.io/driver/postgres"
@@ -26,7 +27,7 @@ func Connect() *gorm.DB {
 		END
 		$$;
 	`)
-	db.AutoMigrate(&user.User{})
+	db.AutoMigrate(&user.User{}, &revoked.Revoked{})
 
 	return db
 }

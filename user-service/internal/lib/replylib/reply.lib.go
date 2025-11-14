@@ -10,6 +10,7 @@ const (
 	CodeNotFound    = "NOT_FOUND"
 	CodeServerError = "SERVER_ERROR"
 	CodeBadRequest  = "BAD_REQUESt"
+	CodeUnauthorized = "UNAUTHORIZED"
 )
 
 var Client = reply.NewClient(reply.Client{
@@ -17,5 +18,6 @@ var Client = reply.NewClient(reply.Client{
 		CodeNotFound:    http.StatusNotFound,
 		CodeServerError: http.StatusInternalServerError,
 		CodeBadRequest: http.StatusBadRequest,
+		CodeUnauthorized: http.StatusUnauthorized,
 	},
 })
