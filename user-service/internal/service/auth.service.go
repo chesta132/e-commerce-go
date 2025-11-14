@@ -89,7 +89,7 @@ func (s *EchoAuth) ValidateAuth(access string, refresh string) (user user.User, 
 		if err == nil {
 			newAccess = token.CreateAccess(user)
 		}
-		if r.Expires.After(time.Now()) {
+		if r.Expires.Before(time.Now()) {
 			s.rr.CreateByValue(s.ctx, refresh)
 			newRefresh = token.CreateRefresh(user)
 		}
