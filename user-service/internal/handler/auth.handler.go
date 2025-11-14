@@ -23,20 +23,37 @@ func (h *Auth) Signin(c echo.Context) error {
 	s := h.s.AttachEcho(c)
 	p := service.SigninPayload{}
 	if err := c.Bind(&p); err != nil {
-		rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
-		return nil
+		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
 	}
 
 	u, err := s.Signin(&p)
 
 	if err != nil {
-		errorlib.HandleSigninError(err, rp)
-		return nil
+		return errorlib.HandleSigninError(err, rp)
 	}
 
-	rp.Success(u).SetCookies(
+	return rp.Success(u).SetCookies(
 		token.CreateAccessCookie(u, p.RememberMe),
 		token.CreateRefreshCookie(u, p.RememberMe),
 	).OkJSON()
-	return nil
+}
+
+func (h *Auth) Signup(c echo.Context) error {
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	s := h.s.AttachEcho(c)
+	p := service.SignupPayload{}
+	if err := c.Bind(&p); err != nil {
+		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
+	}
+
+	u, err := s.Signup(&p)
+
+	if err != nil {
+		return errorlib.HandleSignupError(err, rp)
+	}
+
+	return rp.Success(u).SetCookies(
+		token.CreateAccessCookie(u, p.RememberMe),
+		token.CreateRefreshCookie(u, p.RememberMe),
+	).OkJSON()
 }

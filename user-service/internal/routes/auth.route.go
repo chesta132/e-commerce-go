@@ -14,4 +14,5 @@ func (rt *Route) RegisterAuth(g *echo.Group) {
 	h := handler.NewAuth(s)
 
 	g.POST("/sign-in", h.Signin)
+	g.POST("/sign-up", h.Signup)
 }

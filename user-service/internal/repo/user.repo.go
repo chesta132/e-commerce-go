@@ -24,3 +24,7 @@ func (r *User) FindFirst(ctx context.Context, where []query.Where) (user.User, e
 	q, v := query.BuildWhere(where)
 	return gorm.G[user.User](r.db).Where(q, v...).First(ctx)
 }
+
+func (r *User) CreateOne(ctx context.Context, u *user.User) error {
+	return gorm.G[user.User](r.db).Create(ctx, u)
+}
