@@ -26,7 +26,7 @@ type Claims struct {
 func CreateTokenClaim(user user.User, expires time.Duration, softExpires ...time.Duration) Claims {
 	se := expires
 	if len(softExpires) > 0 {
-		se = softExpires[0];
+		se = softExpires[0]
 	}
 	return Claims{
 		ID:      user.ID,
@@ -41,13 +41,13 @@ func CreateTokenClaim(user user.User, expires time.Duration, softExpires ...time
 
 func CreateAccess(user user.User) string {
 	token := jwt.NewWithClaims(Method, CreateTokenClaim(user, AccessExpiry))
-	tstr, _ := token.SignedString(config.ACCESS_TOKEN_SECRET)
+	tstr, _ := token.SignedString([]byte(config.ACCESS_TOKEN_SECRET))
 	return tstr
 }
 
 func CreateRefresh(user user.User) string {
 	token := jwt.NewWithClaims(Method, CreateTokenClaim(user, RefreshExpiry, SoftRefreshExpiry))
-	tstr, _ := token.SignedString(config.REFRESH_TOKEN_SECRET)
+	tstr, _ := token.SignedString([]byte(config.REFRESH_TOKEN_SECRET))
 	return tstr
 }
 
@@ -57,7 +57,7 @@ func ParseAccess(token string) (Claims, bool) {
 		if t.Method != Method {
 			return nil, jwt.ErrTokenUnverifiable
 		}
-		return config.ACCESS_TOKEN_SECRET, nil
+		return []byte(config.ACCESS_TOKEN_SECRET), nil
 	})
 	if err != nil {
 		return claim, false
@@ -71,7 +71,7 @@ func ParseRefresh(token string) (Claims, bool) {
 		if t.Method != Method {
 			return nil, jwt.ErrTokenUnverifiable
 		}
-		return config.REFRESH_TOKEN_SECRET, nil
+		return []byte(config.REFRESH_TOKEN_SECRET), nil
 	})
 
 	if err != nil {
