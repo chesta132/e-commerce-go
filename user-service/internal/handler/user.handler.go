@@ -20,11 +20,14 @@ func NewUser(service *service.User, verifService *service.Verification) *User {
 }
 
 func (h *User) GetOne(c echo.Context) error {
-	id := c.Param("id")
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	u, ok := c.Get("user").(user.User)
+	if !ok {
+		return rp.Error(replylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
+	}
 	svc := h.us.AttachEcho(c)
 
-	user, err := svc.FindById(id)
+	user, err := svc.FindById(u.ID)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
@@ -33,15 +36,19 @@ func (h *User) GetOne(c echo.Context) error {
 }
 
 func (h *User) UpdateOne(c echo.Context) error {
-	id := c.Param("id")
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	u, ok := c.Get("user").(user.User)
+	if !ok {
+		return rp.Error(replylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
+	}
 	svc := h.us.AttachEcho(c)
+
 	updt := user.User{}
 	if err := c.Bind(&updt); err != nil {
 		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
 	}
 
-	u, err := svc.FindByIdAndUpdate(id, user.User{Address: updt.Address, FullName: updt.FullName})
+	u, err := svc.FindByIdAndUpdate(u.ID, user.User{Address: updt.Address, FullName: updt.FullName})
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}

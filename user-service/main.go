@@ -13,9 +13,9 @@ func main() {
 	db := db.Connect()
 	e := echo.New()
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	ug := e.Group("/users")
+	e.Use(middleware.Logger(), middleware.Recover())
+	e.Pre(middleware.RemoveTrailingSlash())
+	ug := e.Group("/user")
 	ag := e.Group("/auth")
 
 	r := routes.New(db)
