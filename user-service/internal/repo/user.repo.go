@@ -30,6 +30,7 @@ func (r *User) CreateOne(ctx context.Context, u *user.User) error {
 }
 
 func (r *User) UpdateOne(ctx context.Context, where []query.Where, u user.User) error {
-	_, err := gorm.G[user.User](r.db).Updates(ctx, u)
+	q, v := query.BuildWhere(where)
+	_, err := gorm.G[user.User](r.db).Where(q, v...).Updates(ctx, u)
 	return err
 }
