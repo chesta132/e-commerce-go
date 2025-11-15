@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"user-service/db/user"
 	"user-service/internal/lib/errorlib"
 	"user-service/internal/lib/replylib"
 	"user-service/internal/service"
@@ -29,6 +30,23 @@ func (h *User) GetOne(c echo.Context) error {
 	}
 
 	return rp.Success(user).OkJSON()
+}
+
+func (h *User) UpdateOne(c echo.Context) error {
+	id := c.Param("id")
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	svc := h.us.AttachEcho(c)
+	updt := user.User{}
+	if err := c.Bind(&updt); err != nil {
+		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
+	}
+
+	u, err := svc.FindByIdAndUpdate(id, user.User{Address: updt.Address, FullName: updt.FullName})
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	return rp.Success(u).OkJSON()
 }
 
 func (h *User) RequestToBecomeAdmin(c echo.Context) error {

@@ -17,4 +17,5 @@ func (rt *Route) RegisterUser(g *echo.Group) {
 	h := handler.NewUser(s, vs)
 
 	g.GET("/:id", h.GetOne)
+	g.PUT("/:id", h.UpdateOne)
 }

@@ -34,3 +34,11 @@ func (s *EchoUser) FindById(id string) (user.User, error) {
 func (s *EchoUser) UpdateById(id string, u user.User) error {
 	return s.r.UpdateOne(s.ctx, []query.Where{{Name: "id", Value: id}}, u)
 }
+
+func (s *EchoUser) FindByIdAndUpdate(id string, u user.User) (user.User, error) {
+	err := s.UpdateById(id, u)
+	if err != nil {
+		return user.User{}, err
+	}
+	return s.r.FindById(s.ctx, id)
+}
