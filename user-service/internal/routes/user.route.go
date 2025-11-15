@@ -9,9 +9,12 @@ import (
 )
 
 func (rt *Route) RegisterUser(g *echo.Group) {
+	vr := repo.NewVerif(rt.db)
+	vs := service.NewVerif(vr)
+
 	r := repo.NewUser(rt.db)
 	s := service.NewUser(r)
-	h := handler.NewUser(s)
+	h := handler.NewUser(s, vs)
 
 	g.GET("/:id", h.GetOne)
 }

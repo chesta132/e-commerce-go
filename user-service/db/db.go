@@ -5,6 +5,7 @@ import (
 	"user-service/config"
 	"user-service/db/revoked"
 	"user-service/db/user"
+	"user-service/db/verification"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,7 +28,7 @@ func Connect() *gorm.DB {
 		END
 		$$;
 	`)
-	db.AutoMigrate(&user.User{}, &revoked.Revoked{})
+	db.AutoMigrate(&user.User{}, &revoked.Revoked{}, &verification.Verification{})
 
 	return db
 }

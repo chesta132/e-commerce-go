@@ -8,6 +8,7 @@ type User struct {
 	Email    string `validate:"required,email" gorm:"index" json:"email"`
 	Password string `validate:"required" json:"-"`
 	Role     string `gorm:"type:user_role;default:'user'" json:"role"`
+	Address  string `json:"address"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
