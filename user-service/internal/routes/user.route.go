@@ -12,11 +12,11 @@ import (
 func (rt *Route) RegisterUser(g *echo.Group) {
 	vr := repo.NewVerif(rt.db)
 	vs := service.NewVerif(vr)
-	
+
 	ur := repo.NewUser(rt.db)
 	us := service.NewUser(ur)
 	uh := handler.NewUser(us, vs)
-	
+
 	rr := repo.NewRevoked(rt.db)
 	as := service.NewAuth(ur, rr)
 
