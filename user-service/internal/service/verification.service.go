@@ -28,10 +28,22 @@ func (s *Verification) AttachEcho(c echo.Context) *EchoVerification {
 	return &EchoVerification{Verification: *s, c: c, ctx: c.Request().Context()}
 }
 
-func (s *EchoVerification) CreateRequestToBecomeAdmin(user *user.User) error {
+func (s *EchoVerification) CreateRequestToBecomeAdmin(id string, userService *EchoUser) error {
+	user, err := userService.FindById(id)
+	if err != nil {
+		return err
+	}
 	if _, err := s.r.FindByValue(s.ctx, user.ID); err == nil {
 		return errorlib.ErrAlreadyRequest
 	}
-	_, err := s.r.CreateOne(s.ctx, user.ID, verification.RequestToBecomeAdmin)
+	_, err = s.r.CreateOne(s.ctx, user.ID, verification.RequestToBecomeAdmin)
 	return err
+}
+
+func (s *EchoVerification) AcceptToBecomeAdmin(id string, userService *EchoUser) error {
+	_, err := s.r.FindByValue(s.ctx, id)
+	if err != nil {
+		return err
+	}
+	return userService.UpdateById(id, user.User{Role: "admin"})
 }

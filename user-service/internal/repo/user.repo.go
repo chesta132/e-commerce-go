@@ -28,3 +28,8 @@ func (r *User) FindFirst(ctx context.Context, where []query.Where) (user.User, e
 func (r *User) CreateOne(ctx context.Context, u *user.User) error {
 	return gorm.G[user.User](r.db).Create(ctx, u)
 }
+
+func (r *User) UpdateOne(ctx context.Context, where []query.Where, u user.User) error {
+	_, err := gorm.G[user.User](r.db).Updates(ctx, u)
+	return err
+}

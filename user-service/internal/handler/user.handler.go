@@ -37,12 +37,7 @@ func (h *User) RequestToBecomeAdmin(c echo.Context) error {
 	svc := h.us.AttachEcho(c)
 	vsvc := h.vs.AttachEcho(c)
 
-	user, err := svc.FindById(id)
-	if err != nil {
-		return errorlib.HandleQueryError(err, rp)
-	}
-
-	err = vsvc.CreateRequestToBecomeAdmin(&user)
+	err := vsvc.CreateRequestToBecomeAdmin(id, svc)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
@@ -50,5 +45,24 @@ func (h *User) RequestToBecomeAdmin(c echo.Context) error {
 	// [IMPORTANT] send notif after notif service developed
 	// also this handler not registered yet
 
-	return rp.Success(user).Info("Request sent, please wait to be accepted").OkJSON()
+	rp.NoContent()
+	return nil
+}
+
+func (h *User) AcceptToBecomeAdmin(c echo.Context) error {
+	id := c.Param("id")
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	svc := h.us.AttachEcho(c)
+	vsvc := h.vs.AttachEcho(c)
+
+	err := vsvc.AcceptToBecomeAdmin(id, svc)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	// [IMPORTANT] send notif after notif service developed
+	// also this handler not registered yet
+
+	rp.NoContent()
+	return nil
 }

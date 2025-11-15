@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"user-service/db/user"
+	"user-service/internal/lib/query"
 	"user-service/internal/repo"
 
 	"github.com/labstack/echo/v4"
@@ -28,4 +29,8 @@ func (r *User) AttachEcho(c echo.Context) *EchoUser {
 
 func (s *EchoUser) FindById(id string) (user.User, error) {
 	return s.r.FindById(s.ctx, id)
+}
+
+func (s *EchoUser) UpdateById(id string, u user.User) error {
+	return s.r.UpdateOne(s.ctx, []query.Where{{Name: "id", Value: id}}, u)
 }
