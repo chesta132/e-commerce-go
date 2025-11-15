@@ -36,6 +36,9 @@ func (s *Auth) Protected(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		rc, err := c.Cookie(config.REFRESH_TOKEN_KEY)
+		if errors.Is(err, http.ErrNoCookie) {
+			return rp.Error(replylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
+		}
 		if err != nil {
 			return rp.Error(replylib.CodeUnauthorized, err.Error()).FailJSON()
 		}

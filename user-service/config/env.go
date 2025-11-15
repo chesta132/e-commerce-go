@@ -12,4 +12,5 @@ var (
 	REFRESH_TOKEN_SECRET = os.Getenv("REFRESH_TOKEN_SECRET")
 	GO_ENV               = os.Getenv("GO_ENV")
 	SERVER_PORT          = os.Getenv("PORT")
+	SERVICE              = os.Getenv("SERVICE")
 )

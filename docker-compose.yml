@@ -36,6 +36,7 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=user_db
       - PORT=8080
+      - SERVICE=user-service
     env_file:
       - .env
       - user-service/.env
