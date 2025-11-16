@@ -43,6 +43,48 @@ services:
     networks:
       - app-network
 
+  postgres-product:
+    image: postgres:15-alpine
+    container_name: postgres-product
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=product_db
+    volumes:
+      - postgres-product-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  go-product:
+    build: ./product-service
+    container_name: go-product
+    volumes:
+      - ~/go/pkg/mod:/go/pkg/mod
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres-product:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres-product
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=product_db
+      - PORT=8080
+      - SERVICE=product-service
+    env_file:
+      - .env
+    networks:
+      - app-network
+
   nginx-gateway:
     image: nginx:latest
     container_name: nginx-gateway
@@ -52,6 +94,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - go-user
+      - go-product
     networks:
       - app-network
 
@@ -61,4 +104,6 @@ networks:
 
 volumes:
   postgres-user-data:
+    driver: local
+  postgres-product-data:
     driver: local
