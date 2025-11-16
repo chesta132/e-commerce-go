@@ -57,8 +57,8 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		payload.Image.Image = img
 	}
 
-	data := productlib.FilterToCreate(payload, admin.ID, *payload.Categories)
-	return data, s.pr.Transaction(func(tx *gorm.DB) error {
+	var data *model.Product
+	err := s.pr.Transaction(func(tx *gorm.DB) error {
 		ir := repo.NewImage(tx)
 		if err := ir.CreateOne(s.ctx, payload.Image); err != nil {
 			return err
@@ -69,7 +69,16 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 			return err
 		}
 
+		mr := repo.NewProductMeta(tx)
+		meta := productlib.FilterMetaToCreate(payload)
+		if err := mr.CreateOne(s.ctx, meta); err != nil {
+			return err
+		}
+
+		data = productlib.FilterToCreate(payload, *meta, admin.ID, *payload.Categories)
+
 		pr := repo.NewProduct(tx)
 		return pr.CreateOne(s.ctx, data)
 	})
+	return data, err
 }

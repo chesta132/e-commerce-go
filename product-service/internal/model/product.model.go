@@ -5,16 +5,27 @@ import (
 )
 
 type Product struct {
-	ID           string `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
-	Name         string `gorm:"index" json:"name"`
-	Description  string `json:"description"`
-	SearchVector string `gorm:"type:tsvector"`
-	SKU          string `gorm:"unique" json:"SKU"`
-	Price        int    `json:"price"`
-	Currency     string `json:"currency"`
+	ID           string      `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
+	Name         string      `gorm:"index" json:"name"`
+	Description  string      `json:"description"`
+	SearchVector string      `gorm:"type:tsvector"`
+	SKU          string      `gorm:"unique" json:"SKU"`
+	MetaId       string      `gorm:"unique" json:"metaId"`
+	Meta         ProductMeta `gorm:"foreignKey:MetaId"`
 
 	Categories []Category `gorm:"many2many:product_categories;" json:"categories"`
 	AdminId    string     `json:"adminId"`
+
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
+}
+
+type ProductMeta struct {
+	ID            string `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
+	Price         int    `json:"price"`
+	Currency      string `json:"currency"`
+	TotalQuantity int    `json:"quantity"`
+	TotalReserved int    `json:"reserved"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
