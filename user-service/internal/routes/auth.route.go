@@ -19,4 +19,5 @@ func (rt *Route) RegisterAuth(g *echo.Group) {
 	g.POST("/sign-in", h.Signin)
 	g.POST("/sign-up", h.Signup)
 	g.GET("/user", mw.Protected(h.TokenValid))
+	g.GET("/admin", mw.Protected(middleware.AdminOnly(h.TokenValid)))
 }
