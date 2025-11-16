@@ -5,14 +5,36 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"product-service/config"
+	"time"
 
 	"github.com/chesta132/e-commerce-go/shared"
 	"github.com/chesta132/goreply/reply"
 )
 
-func GetUserDataWithAuth() (*shared.User, error) {
-	resp, err := http.Get(config.USER_SERVICE_URL + "/auth/admin")
+func GetAdminDataWithAuth(cookies []*http.Cookie) (*shared.User, error) {
+	url := config.USER_SERVICE_URL + "/auth/admin"
+
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, err
+	}
+	client := &http.Client{
+		Jar:     jar,
+		Timeout: 10 * time.Second,
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range cookies {
+		req.AddCookie(v)
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -29,13 +51,20 @@ func GetUserDataWithAuth() (*shared.User, error) {
 		return nil, err
 	}
 
-	if err, ok := body.Data.(reply.ErrorPayload); ok {
-		return nil, errors.New(err.Message)
+	dataBytes, err := json.Marshal(body.Data)
+	if err != nil {
+		return nil, err
 	}
 
-	user, ok := body.Data.(*shared.User)
-	if !ok {
-		return nil, errors.New("bad-request: user service doesn't sent a valid data")
+	var errPayload reply.ErrorPayload
+	if json.Unmarshal(dataBytes, &errPayload) == nil && errPayload.Message != "" {
+		return nil, errors.New(errPayload.Message)
 	}
-	return user, nil
+
+	var user shared.User
+	if err := json.Unmarshal(dataBytes, &user); err != nil {
+		return nil, errors.New("bad-request: user service doesn't sent valid data")
+	}
+
+	return &user, nil
 }

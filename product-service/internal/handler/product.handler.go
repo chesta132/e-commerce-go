@@ -55,11 +55,11 @@ func (h *Product) CreateOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 
 	payload := model.CreateProductPayload{}
-	if err := c.Bind(payload); err != nil {
-		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
+	if err := c.Bind(&payload); err != nil {
+		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 
-	user, err := userlib.GetUserDataWithAuth()
+	user, err := userlib.GetAdminDataWithAuth(c.Cookies())
 	if err != nil {
 		return rp.Error(replylib.CodeBadGateway, err.Error()).FailJSON()
 	}

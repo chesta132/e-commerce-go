@@ -8,12 +8,12 @@ type Product struct {
 	ID           string      `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
 	Name         string      `gorm:"index" json:"name"`
 	Description  string      `json:"description"`
-	SearchVector string      `gorm:"type:tsvector"`
-	SKU          string      `gorm:"unique" json:"SKU"`
+	SearchVector string      `gorm:"type:tsvector;->" json:"-"`
+	SKU          string      `gorm:"unique"`
 	MetaId       string      `gorm:"unique" json:"metaId"`
-	Meta         ProductMeta `gorm:"foreignKey:MetaId"`
+	Meta         ProductMeta `gorm:"foreignKey:MetaId" json:"meta,omitzero"`
 
-	Categories []Category `gorm:"many2many:product_categories;" json:"categories"`
+	Categories []Category `gorm:"many2many:product_categories;" json:"categories,omitempty"`
 	AdminId    string     `json:"adminId"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`

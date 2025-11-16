@@ -76,6 +76,7 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		}
 
 		data = productlib.FilterToCreate(payload, *meta, admin.ID, *payload.Categories)
+		data.Meta = *meta
 
 		pr := repo.NewProduct(tx)
 		return pr.CreateOne(s.ctx, data)
