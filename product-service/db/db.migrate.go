@@ -1,15 +1,13 @@
 package db
 
 import (
-	"product-service/db/category"
-	"product-service/db/product"
-	"product-service/db/stock"
+	"product-service/internal/model"
 
 	"gorm.io/gorm"
 )
 
 func Migrate(db *gorm.DB) {
-	if err := db.AutoMigrate(&product.Product{}, &category.Category{}, &stock.Stock{}); err != nil {
+	if err := db.AutoMigrate(&model.Product{}, &model.Category{}, &model.Stock{}, &model.Image{}); err != nil {
 		panic(err.Error())
 	}
 

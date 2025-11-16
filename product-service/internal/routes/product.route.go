@@ -14,4 +14,5 @@ func (rt *Route) RegisterProduct(productGroup *echo.Group) {
 	ph := handler.NewProduct(ps)
 
 	productGroup.GET("/search", ph.SearchByKeyword)
+	productGroup.POST("", ph.CreateOne)
 }
