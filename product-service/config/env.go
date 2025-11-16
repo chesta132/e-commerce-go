@@ -13,5 +13,5 @@ var (
 	GO_ENV           = os.Getenv("GO_ENV")
 	SERVER_PORT      = os.Getenv("PORT")
 	SERVICE          = os.Getenv("SERVICE")
-	USER_SERVICE_URL = "http://" + os.Getenv("USER_SERVICE")
+	USER_SERVICE_URL = os.Getenv("USER_SERVICE_URL")
 )
