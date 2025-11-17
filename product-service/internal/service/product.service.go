@@ -3,13 +3,14 @@ package service
 import (
 	"context"
 	"product-service/config"
+	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/imagelib"
 	"product-service/internal/lib/productlib"
 	"product-service/internal/lib/validatorlib"
 	"product-service/internal/model"
 	"product-service/internal/repo"
 
-	"github.com/chesta132/e-commerce-go/shared"
+	"github.com/chesta132/e-commerce-go/shared/smodel"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -32,20 +33,22 @@ func (s *Product) AttachEcho(c echo.Context) *EchoProduct {
 	return &EchoProduct{Product: *s, ctx: c.Request().Context(), c: c}
 }
 
-func (s *EchoProduct) SearchByKeyword(keyword string, offset int) ([]model.Product, error) {
-	return s.pr.SearchByKeyword(s.ctx, keyword, offset, config.PAGINATION_LIMIT)
+// This func will limit as pagination limit's config + 1
+func (s *EchoProduct) SearchByKeyword(keyword string, offset int, categoryIds []string) ([]model.Product, error) {
+	return s.pr.SearchByKeyword(s.ctx, keyword, repo.SearchByKeywordOptions{
+		Offset:      offset,
+		Limit:       config.PAGINATION_LIMIT + 1,
+		CategoryIds: categoryIds,
+	})
 }
 
-func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *shared.User) (*model.Product, error) {
+func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *smodel.User) (*model.Product, error) {
 	if v := validatorlib.Validate.Struct(payload); v != nil {
 		return nil, v
 	}
 
 	if payload.Image == nil {
 		payload.Image = &model.Image{}
-	}
-	if payload.Categories == nil {
-		payload.Categories = &[]model.Category{}
 	}
 
 	payload.Image.ID = ""
@@ -56,16 +59,21 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		}
 		payload.Image.Image = img
 	}
+	db := s.pr.DB()
 
 	var data *model.Product
-	err := s.pr.Transaction(func(tx *gorm.DB) error {
-		ir := repo.NewImage(tx)
-		if err := ir.CreateOne(s.ctx, payload.Image); err != nil {
+	err := db.Transaction(func(tx *gorm.DB) error {
+		cr := repo.NewCategory(tx)
+		existingCat, err := cr.FindManyByIds(s.ctx, payload.CategoryIds)
+		if err != nil {
 			return err
 		}
+		if len(existingCat) < 1 {
+			return errorlib.ErrNoCategoryToCreate
+		}
 
-		cr := repo.NewCategory(tx)
-		if err := cr.CreateMany(s.ctx, payload.Categories); err != nil {
+		ir := repo.NewImage(tx)
+		if err := ir.CreateOne(s.ctx, payload.Image); err != nil {
 			return err
 		}
 
@@ -75,7 +83,7 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 			return err
 		}
 
-		data = productlib.FilterToCreate(payload, *meta, admin.ID, *payload.Categories)
+		data = productlib.FilterToCreate(payload, *meta, admin.ID, existingCat)
 		data.Meta = *meta
 
 		pr := repo.NewProduct(tx)

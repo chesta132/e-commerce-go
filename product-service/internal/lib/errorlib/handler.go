@@ -24,3 +24,13 @@ func HandleValidateError(err validator.ValidationErrors, rp *reply.Reply) error 
 	}
 	return rp.Error(replylib.CodeBadRequest, err.Error(), reply.OptErrorPayload{Field: strings.Join(fields, ", ")}).FailJSON()
 }
+
+func HandleCreateProductError(err error, rp *reply.Reply) error {
+	if err, ok := err.(validator.ValidationErrors); ok {
+		return HandleValidateError(err, rp)
+	}
+	if errors.Is(err, ErrNoCategoryToCreate) {
+		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
+	}
+	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+}

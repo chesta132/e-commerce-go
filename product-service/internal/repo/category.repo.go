@@ -22,3 +22,7 @@ func (r *Category) CreateOne(ctx context.Context, category *model.Category) erro
 func (r *Category) CreateMany(ctx context.Context, categories *[]model.Category) error {
 	return r.db.WithContext(ctx).Create(categories).Error
 }
+
+func (r *Category) FindManyByIds(ctx context.Context, ids []string) ([]model.Category, error) {
+	return gorm.G[model.Category](r.db).Where("id IN ?", ids).Find(ctx)
+}

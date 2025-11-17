@@ -9,16 +9,16 @@ import (
 	"product-service/config"
 	"time"
 
-	"github.com/chesta132/e-commerce-go/shared"
+	"github.com/chesta132/e-commerce-go/shared/smodel"
 	"github.com/chesta132/goreply/reply"
 )
 
-func GetAdminDataWithAuth(cookies []*http.Cookie) (*shared.User, error) {
+func GetAdminDataWithAuth(cookies []*http.Cookie) (user *smodel.User, cookie string, err error) {
 	url := config.USER_SERVICE_URL + "/auth/admin"
 
 	jar, err := cookiejar.New(nil)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	client := &http.Client{
 		Jar:     jar,
@@ -27,7 +27,7 @@ func GetAdminDataWithAuth(cookies []*http.Cookie) (*shared.User, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	for _, v := range cookies {
@@ -36,35 +36,35 @@ func GetAdminDataWithAuth(cookies []*http.Cookie) (*shared.User, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	var body reply.ReplyEnvelope
 	err = json.Unmarshal(bodyBytes, &body)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	dataBytes, err := json.Marshal(body.Data)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	var errPayload reply.ErrorPayload
 	if json.Unmarshal(dataBytes, &errPayload) == nil && errPayload.Message != "" {
-		return nil, errors.New(errPayload.Message)
+		return nil, "", errors.New(errPayload.Message)
 	}
 
-	var user shared.User
-	if err := json.Unmarshal(dataBytes, &user); err != nil {
-		return nil, errors.New("bad-request: user service doesn't sent valid data")
+	var u smodel.User
+	if err := json.Unmarshal(dataBytes, &u); err != nil {
+		return nil, "", errors.New("bad-request: user service doesn't sent valid data")
 	}
 
-	return &user, nil
+	return &u, resp.Header.Get("Set-Cookie"), nil
 }

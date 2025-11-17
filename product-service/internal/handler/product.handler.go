@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	adapter "github.com/chesta132/goreply/adapter/echo"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,6 +28,7 @@ func (h *Product) SearchByKeyword(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 
 	offset, _ := strconv.Atoi(c.QueryParam("offset"))
+	categoryIds := c.QueryParams()["category-id"]
 	keyword := strings.TrimSpace(c.QueryParam(config.KEYWORD_QUERY[0]))
 	for i, v := range config.KEYWORD_QUERY {
 		if keyword != "" {
@@ -42,12 +42,12 @@ func (h *Product) SearchByKeyword(c echo.Context) error {
 		}
 	}
 
-	products, err := svc.SearchByKeyword(keyword, offset)
+	products, err := svc.SearchByKeyword(keyword, offset, categoryIds)
 	if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 	}
 
-	return rp.Success(products).OkJSON()
+	return rp.Success(products).PaginateCursor(config.PAGINATION_LIMIT, offset).OkJSON()
 }
 
 func (h *Product) CreateOne(c echo.Context) error {
@@ -59,17 +59,17 @@ func (h *Product) CreateOne(c echo.Context) error {
 		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 
-	user, err := userlib.GetAdminDataWithAuth(c.Cookies())
+	user, cookie, err := userlib.GetAdminDataWithAuth(c.Cookies())
 	if err != nil {
 		return rp.Error(replylib.CodeBadGateway, err.Error()).FailJSON()
+	}
+	if cookie != "" {
+		rp.AddHeader("Set-Cookie", cookie)
 	}
 
 	product, err := svc.CreateProduct(&payload, user)
 	if err != nil {
-		if err, ok := err.(validator.ValidationErrors); ok {
-			return errorlib.HandleValidateError(err, rp)
-		}
-		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+		return errorlib.HandleCreateProductError(err, rp)
 	}
 	return rp.Success(product).CreatedJSON()
 }
