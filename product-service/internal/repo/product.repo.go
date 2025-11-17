@@ -5,6 +5,7 @@ import (
 	"product-service/internal/model"
 	"strings"
 
+	"github.com/chesta132/e-commerce-go/shared/stypelib"
 	"gorm.io/gorm"
 )
 
@@ -40,28 +41,46 @@ func (r *Product) SearchQuery(keyword string) (query *gorm.DB) {
 			pre, keyword, "%"+keyword+"%", "%"+keyword+"%", keyword, keyword)
 }
 
-func (r *Product) SearchByKeyword(ctx context.Context, keyword string, opt SearchByKeywordOptions) ([]model.Product, error) {
-	var products []model.Product
-
+func (r *Product) SearchByKeyword(ctx context.Context, keyword string, opt SearchByKeywordOptions) (products []model.Product, notFoundCatIds []string, err error) {
 	subQuery := r.SearchQuery(keyword).WithContext(ctx)
-	if len(opt.CategoryIds) > 0 {
-		subQuery = subQuery.
-			Joins("JOIN product_categories pc ON pc.product_id = products.id").
-			Joins("JOIN categories c ON c.id = pc.category_id").
-			Where("c.id IN ?", opt.CategoryIds)
-	}
 
-	err := r.db.
+	query := r.db.
 		Preload("Meta").
 		Preload("Categories").
 		Table("(?) as sub", subQuery).
-		Where("rank > 0.2").
+		Where("rank > 0.2")
+
+	if len(opt.CategoryIds) > 0 {
+		var existingIds []string
+		err := r.db.Model(&model.Category{}).
+			Where("id IN ?", opt.CategoryIds).
+			Pluck("id", &existingIds).Error
+
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if len(existingIds) < len(opt.CategoryIds) {
+			notFoundCatIds = stypelib.FilterNotInSlice(opt.CategoryIds, existingIds)
+		}
+
+		if len(existingIds) == 0 {
+			return nil, notFoundCatIds, nil
+		}
+
+		query = query.
+			Joins("JOIN product_categories pc ON pc.product_id = sub.id").
+			Joins("JOIN categories c ON c.id = pc.category_id").
+			Where("c.id IN ?", existingIds)
+	}
+
+	err = query.
 		Order("rank DESC").
 		Offset(opt.Offset).
 		Limit(opt.Limit).
 		Find(&products).Error
 
-	return products, err
+	return products, notFoundCatIds, err
 }
 
 func (r *Product) CreateOne(ctx context.Context, p *model.Product) error {

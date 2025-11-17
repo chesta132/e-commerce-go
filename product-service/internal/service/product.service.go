@@ -34,7 +34,7 @@ func (s *Product) AttachEcho(c echo.Context) *EchoProduct {
 }
 
 // This func will limit as pagination limit's config + 1
-func (s *EchoProduct) SearchByKeyword(keyword string, offset int, categoryIds []string) ([]model.Product, error) {
+func (s *EchoProduct) SearchByKeyword(keyword string, offset int, categoryIds []string) (products []model.Product, notFoundCatIds []string, err error) {
 	return s.pr.SearchByKeyword(s.ctx, keyword, repo.SearchByKeywordOptions{
 		Offset:      offset,
 		Limit:       config.PAGINATION_LIMIT + 1,

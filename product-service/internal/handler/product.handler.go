@@ -43,9 +43,12 @@ func (h *Product) SearchByKeyword(c echo.Context) error {
 		}
 	}
 
-	products, err := svc.SearchByKeyword(keyword, offset, categoryIds)
+	products, nfCatIds, err := svc.SearchByKeyword(keyword, offset, categoryIds)
 	if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	}
+	if len(nfCatIds) > 0 {
+		rp.Info(fmt.Sprintf("Category(s) with id (%s) not found", strings.Join(nfCatIds, " | ")))
 	}
 
 	return rp.Success(products).PaginateCursor(config.PAGINATION_LIMIT, offset).OkJSON()
