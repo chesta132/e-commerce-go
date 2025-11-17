@@ -19,9 +19,12 @@ func main() {
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	pg := e.Group("/products")
+	cg := e.Group("/categories")
 	router.RegisterProduct(pg)
+	router.RegisterCategory(cg)
 
 	pg.Any("/*", handler.NotFound)
+	cg.Any("/*", handler.NotFound)
 	e.Any("/*", handler.NotFound)
 
 	e.Logger.Info("product-service started at :" + config.SERVER_PORT)

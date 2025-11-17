@@ -26,3 +26,7 @@ func (r *Category) CreateMany(ctx context.Context, categories *[]model.Category)
 func (r *Category) FindManyByIds(ctx context.Context, ids []string) ([]model.Category, error) {
 	return gorm.G[model.Category](r.db).Where("id IN ?", ids).Find(ctx)
 }
+
+func (r *Category) FindById(ctx context.Context, id string) (model.Category, error) {
+	return gorm.G[model.Category](r.db).Where("id = ?", id).First(ctx)
+}

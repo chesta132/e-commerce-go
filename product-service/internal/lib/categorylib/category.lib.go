@@ -2,15 +2,11 @@ package categorylib
 
 import (
 	"product-service/internal/model"
-	"time"
 )
 
-func FilterToCreate(category *model.Category) *model.Category {
-	if category == nil {
-		return &model.Category{}
+func FilterToCreate(payload model.CreateCategoryPayload) *model.Category {
+	return &model.Category{
+		Name:        payload.Name,
+		Description: payload.Description,
 	}
-	category.ID = ""
-	category.CreatedAt = time.Time{}
-	category.UpdatedAt = time.Time{}
-	return category
 }

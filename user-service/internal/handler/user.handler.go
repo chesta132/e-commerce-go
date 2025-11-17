@@ -7,6 +7,7 @@ import (
 	"user-service/internal/service"
 
 	adapter "github.com/chesta132/goreply/adapter/echo"
+	"github.com/chesta132/goreply/reply"
 	"github.com/labstack/echo/v4"
 )
 
@@ -45,7 +46,7 @@ func (h *User) UpdateOne(c echo.Context) error {
 
 	updt := user.User{}
 	if err := c.Bind(&updt); err != nil {
-		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
+		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
 	u, err := svc.FindByIdAndUpdate(u.ID, user.User{Address: updt.Address, FullName: updt.FullName})

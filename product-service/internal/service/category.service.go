@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"product-service/internal/lib/categorylib"
 	"product-service/internal/model"
 	"product-service/internal/repo"
 
@@ -28,4 +29,13 @@ func (s *Category) AttachEcho(c echo.Context) *EchoCategory {
 
 func (s *EchoCategory) CreateMany(categories *[]model.Category) error {
 	return s.cr.CreateMany(s.ctx, categories)
+}
+
+func (s *EchoCategory) CreateOne(payload model.CreateCategoryPayload) (model.Category, error) {
+	category := categorylib.FilterToCreate(payload)
+	return *category, s.cr.CreateOne(s.ctx, category)
+}
+
+func (s *EchoCategory) FindById(id string) (model.Category, error) {
+	return s.cr.FindById(s.ctx, id)
 }

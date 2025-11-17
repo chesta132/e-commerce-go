@@ -9,6 +9,7 @@ import (
 	"user-service/internal/service"
 
 	adapter "github.com/chesta132/goreply/adapter/echo"
+	"github.com/chesta132/goreply/reply"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,7 +26,7 @@ func (h *Auth) Signin(c echo.Context) error {
 	s := h.s.AttachEcho(c)
 	p := model.SigninPayload{}
 	if err := c.Bind(&p); err != nil {
-		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
+		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
 	u, err := s.Signin(&p)
@@ -45,7 +46,7 @@ func (h *Auth) Signup(c echo.Context) error {
 	s := h.s.AttachEcho(c)
 	p := model.SignupPayload{}
 	if err := c.Bind(&p); err != nil {
-		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body").FailJSON()
+		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
 	u, err := s.Signup(&p)

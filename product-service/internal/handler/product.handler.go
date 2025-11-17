@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	adapter "github.com/chesta132/goreply/adapter/echo"
+	"github.com/chesta132/goreply/reply"
 	"github.com/labstack/echo/v4"
 )
 
@@ -56,7 +57,7 @@ func (h *Product) CreateOne(c echo.Context) error {
 
 	payload := model.CreateProductPayload{}
 	if err := c.Bind(&payload); err != nil {
-		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
+		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
 	user, cookie, err := userlib.GetAdminDataWithAuth(c.Cookies())
