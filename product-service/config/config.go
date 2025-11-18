@@ -1,7 +1,8 @@
 package config
 
 const (
-	PAGINATION_LIMIT = 100
+	PAGINATION_LIMIT    = 100
+	THUMBNAIL_PATH      = "/uploads/products/thumbnail"
 )
 
 var (

@@ -4,7 +4,6 @@ import (
 	"context"
 	"product-service/config"
 	"product-service/internal/lib/errorlib"
-	"product-service/internal/lib/imagelib"
 	"product-service/internal/lib/productlib"
 	"product-service/internal/lib/validatorlib"
 	"product-service/internal/model"
@@ -47,21 +46,9 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		return nil, v
 	}
 
-	if payload.Image == nil {
-		payload.Image = &model.Image{}
-	}
-
-	payload.Image.ID = ""
-	if payload.Image.Image == nil {
-		img, err := imagelib.ReadDefaultImage()
-		if err != nil {
-			return nil, err
-		}
-		payload.Image.Image = img
-	}
 	db := s.pr.DB()
-
 	var data *model.Product
+
 	err := db.Transaction(func(tx *gorm.DB) error {
 		cr := repo.NewCategory(tx)
 		existingCat, err := cr.FindManyByIds(s.ctx, payload.CategoryIds)
@@ -70,11 +57,6 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		}
 		if len(existingCat) < 1 {
 			return errorlib.ErrNoCategoryToCreate
-		}
-
-		ir := repo.NewImage(tx)
-		if err := ir.CreateOne(s.ctx, payload.Image); err != nil {
-			return err
 		}
 
 		mr := repo.NewProductMeta(tx)
