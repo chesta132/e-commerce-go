@@ -5,16 +5,17 @@ import (
 )
 
 type Product struct {
-	ID           string      `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
-	Name         string      `gorm:"index" json:"name"`
-	Description  string      `json:"description" gorm:"index"`
-	SearchVector string      `gorm:"type:tsvector;->" json:"-"`
-	SKU          string      `gorm:"unique"`
-	MetaId       string      `gorm:"unique" json:"metaId"`
-	Meta         ProductMeta `gorm:"foreignKey:MetaId" json:"meta,omitzero"`
+	ID           string `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
+	Name         string `gorm:"index" json:"name"`
+	Description  string `gorm:"index" json:"description"`
+	SearchVector string `gorm:"type:tsvector;->" json:"-"`
+	SKU          string `gorm:"unique"`
 
-	Categories []Category `gorm:"many2many:product_categories;" json:"categories,omitempty"`
-	AdminId    string      `json:"adminId" gorm:"index"`
+	MetaId string      `gorm:"unique" json:"metaId"`
+	Meta   ProductMeta `gorm:"foreignKey:MetaId;constraint:OnDelete:CASCADE" json:"meta,omitzero"`
+
+	Categories []Category `gorm:"many2many:product_categories" json:"categories,omitempty"`
+	AdminId    string     `json:"adminId" gorm:"index"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
@@ -37,5 +38,4 @@ type CreateProductPayload struct {
 	Price       int      `json:"price" validate:"required"`
 	Currency    string   `json:"currency" validate:"required"`
 	CategoryIds []string `json:"categoryIds" validate:"required"`
-	Image       *Image   `json:"image"`
 }

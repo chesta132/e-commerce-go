@@ -5,7 +5,8 @@ import (
 	"product-service/internal/model"
 	"strings"
 
-	"github.com/chesta132/e-commerce-go/shared/stypelib"
+	"github.com/chesta132/e-commerce-go/shared/squery"
+	"github.com/chesta132/e-commerce-go/shared/sslicelib"
 	"gorm.io/gorm"
 )
 
@@ -20,6 +21,10 @@ type SearchByKeywordOptions struct {
 
 func NewProduct(db *gorm.DB) *Product {
 	return &Product{db}
+}
+
+func (r *Product) DB() *gorm.DB {
+	return r.db
 }
 
 func (r *Product) SearchQuery(keyword string) (query *gorm.DB) {
@@ -61,7 +66,7 @@ func (r *Product) SearchByKeyword(ctx context.Context, keyword string, opt Searc
 		}
 
 		if len(existingIds) < len(opt.CategoryIds) {
-			notFoundCatIds = stypelib.FilterNotInSlice(opt.CategoryIds, existingIds)
+			notFoundCatIds = sslicelib.FilterNotInSlice(opt.CategoryIds, existingIds)
 		}
 
 		if len(existingIds) == 0 {
@@ -87,6 +92,7 @@ func (r *Product) CreateOne(ctx context.Context, p *model.Product) error {
 	return gorm.G[model.Product](r.db).Create(ctx, p)
 }
 
-func (r *Product) DB() *gorm.DB {
-	return r.db
+func (r *Product) FindFirst(ctx context.Context, where []squery.Where) (model.Product, error) {
+	q, v := squery.BuildWhere(where)
+	return gorm.G[model.Product](r.db).Where(q, v...).First(ctx)
 }

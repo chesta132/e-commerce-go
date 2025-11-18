@@ -15,6 +15,10 @@ func NewCategory(db *gorm.DB) *Category {
 	return &Category{db}
 }
 
+func (r *Category) DB() *gorm.DB {
+	return r.db
+}
+
 func (r *Category) CreateOne(ctx context.Context, category *model.Category) error {
 	return gorm.G[model.Category](r.db).Create(ctx, category)
 }
