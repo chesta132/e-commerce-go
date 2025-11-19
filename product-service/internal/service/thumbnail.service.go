@@ -38,7 +38,12 @@ func (s *Thumbnail) CreateThumbnail(thumbnail *model.Thumbnail, projectId string
 	thumbnaillib.Reindex(&meta)
 
 	metaPath := thumbnaillib.GetMetaPath(projectId)
-	return s.tr.WriteMeta(metaPath, &meta)
+	if err := s.tr.WriteMeta(metaPath, &meta); err != nil {
+		s.tr.DeleteFile(thumbnail.Path)
+		return err
+	}
+
+	return nil
 }
 
 func (s *Thumbnail) GetThumbnail(id string, projectId string) (*model.Thumbnail, []byte, error) {
@@ -78,12 +83,7 @@ func (s *Thumbnail) UpdateThumbnail(thumbnail *model.Thumbnail, projectId string
 	})
 
 	metaPath := thumbnaillib.GetMetaPath(projectId)
-	if err := s.tr.WriteMeta(metaPath, &meta); err != nil {
-		s.tr.DeleteFile(thumbnail.Path)
-		return err
-	}
-
-	return nil
+	return s.tr.WriteMeta(metaPath, &meta)
 }
 
 func (s *Thumbnail) DeleteThumbnail(id, projectId string) error {
