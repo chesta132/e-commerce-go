@@ -21,9 +21,28 @@ func Reindex(meta *model.ThumbnailMeta) {
 	}
 }
 
+// returns "" if file name is not a valid file name
 func GetExtension(fileName string) string {
 	i := strings.LastIndex(fileName, ".")
-	return fileName[i+1:]
+	fileName = fileName[i+1:]
+	if strings.Contains(fileName, "/") && strings.Contains(fileName, "\\") {
+		return ""
+	}
+	return fileName
+}
+
+// returns "" if file name is not a valid file name
+func GetFileName(fileName string) string {
+	if fn := GetExtension(fileName); fn == "" {
+		return ""
+	}
+	indexs := []int{strings.LastIndex(fileName, "."), strings.LastIndex(fileName, "/"), strings.LastIndex(fileName, "\\")}
+	for _, i := range indexs {
+		if i != -1 {
+			fileName = fileName[:i]
+		}
+	}
+	return fileName
 }
 
 func GetFilePath(thumbnail *model.Thumbnail, projectId string) string {
@@ -50,4 +69,13 @@ func GenerateThumbnail(file *multipart.FileHeader, meta *model.ThumbnailMeta, wi
 	}
 	t.Path = GetFilePath(t, meta.ProjectId)
 	return t
+}
+
+func GetDefaultThumbnail() model.Thumbnail {
+	path := config.DEFAULT_THUMBNAIL_PATH
+	return model.Thumbnail{
+		ID:        path,
+		Extension: GetExtension(path),
+		Path:      path,
+	}
 }

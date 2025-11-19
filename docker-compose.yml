@@ -24,7 +24,6 @@ services:
     container_name: go-user
     volumes:
       - ~/go/pkg/mod:/go/pkg/mod
-      - ./assets:/assets
     ports:
       - "8080:8080"
     depends_on:
@@ -68,7 +67,7 @@ services:
     container_name: go-product
     volumes:
       - ~/go/pkg/mod:/go/pkg/mod
-      - ./assets:/assets
+      - ./uploads:/uploads
     ports:
       - "8081:8080"
     depends_on:

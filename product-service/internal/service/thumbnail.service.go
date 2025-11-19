@@ -2,13 +2,13 @@ package service
 
 import (
 	"os"
+	"product-service/config"
 	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/thumbnaillib"
 	"product-service/internal/model"
 	"product-service/internal/repo"
 
 	"github.com/chesta132/e-commerce-go/shared/sslicelib"
-	"github.com/google/uuid"
 )
 
 type Thumbnail struct {
@@ -29,10 +29,6 @@ func (s *Thumbnail) CreateThumbnail(thumbnail *model.Thumbnail, projectId string
 	if err != nil {
 		return err
 	}
-
-	thumbnail.ID = uuid.NewString()
-	thumbnail.Position = len(meta.Thumbnails) + 1
-	thumbnail.Path = thumbnaillib.GetFilePath(thumbnail, projectId)
 
 	if err := s.tr.WriteFile(thumbnail.Path, content); err != nil {
 		return err
@@ -115,4 +111,9 @@ func (s *Thumbnail) DeleteThumbnail(id, projectId string) error {
 
 	metaPath := thumbnaillib.GetMetaPath(projectId)
 	return s.tr.WriteMeta(metaPath, &meta)
+}
+
+func (s *Thumbnail) ReadDefaultThumbnail() (model.Thumbnail, []byte, error) {
+	content, err := s.tr.ReadFile(config.DEFAULT_THUMBNAIL_PATH)
+	return thumbnaillib.GetDefaultThumbnail(), content, err
 }
