@@ -13,6 +13,7 @@ import (
 func main() {
 	db := db.Connect()
 	e := echo.New()
+	e.HTTPErrorHandler = handler.DefaultErrorHandler
 
 	e.Use(middleware.Logger(), middleware.Recover())
 	e.Pre(middleware.RemoveTrailingSlash())

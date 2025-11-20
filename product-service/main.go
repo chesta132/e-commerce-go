@@ -15,6 +15,7 @@ func main() {
 	e := echo.New()
 	router := routes.New(db)
 
+	e.HTTPErrorHandler = handler.DefaultErrorHandler
 	e.Use(middleware.Logger(), middleware.Recover())
 	e.Pre(middleware.RemoveTrailingSlash())
 

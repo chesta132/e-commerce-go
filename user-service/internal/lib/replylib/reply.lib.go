@@ -14,14 +14,25 @@ const (
 	CodeUnauthorized = "UNAUTHORIZED"
 )
 
+var CodeAliases = map[string]int{
+	CodeNotFound:     http.StatusNotFound,
+	CodeServerError:  http.StatusInternalServerError,
+	CodeBadRequest:   http.StatusBadRequest,
+	CodeUnauthorized: http.StatusUnauthorized,
+}
+
 var Client = reply.NewClient(reply.Client{
-	CodeAliases: map[string]int{
-		CodeNotFound:     http.StatusNotFound,
-		CodeServerError:  http.StatusInternalServerError,
-		CodeBadRequest:   http.StatusBadRequest,
-		CodeUnauthorized: http.StatusUnauthorized,
-	},
+	CodeAliases: CodeAliases,
 	DefaultHeaders: map[string]string{
 		"X-Service": config.SERVICE,
 	},
 })
+
+func GetCodeByStatus(status int) string {
+	for k, v := range CodeAliases {
+		if v == status {
+			return k
+		}
+	}
+	return CodeServerError
+}
