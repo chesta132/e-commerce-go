@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"errors"
 	"product-service/config"
 	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/previewlib"
@@ -12,7 +11,6 @@ import (
 	adapter "github.com/chesta132/goreply/adapter/echo"
 	"github.com/chesta132/goreply/reply"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type Preview struct {
@@ -30,7 +28,7 @@ func (h *Preview) GetOne(c echo.Context) error {
 	prodId := c.Param("prod-id")
 	id := c.Param("id")
 
-	meta, preview, err := svc.GetPreview(id, prodId)
+	meta, preview, err := svc.GetPreviewFile(id, prodId)
 	if err != nil {
 		_, p, e := svc.ReadDefaultPreview()
 		if e != nil {
@@ -49,10 +47,8 @@ func (h *Preview) GetInfo(c echo.Context) error {
 	prodId := c.Param("prod-id")
 
 	product, err := psvc.FindByIdWithRelation(prodId, []string{"Previews"})
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
-	} else if err != nil {
-		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	if err != nil {
+		return errorlib.HandleValidateProductOnPreviewError(err, rp)
 	}
 
 	return rp.Success(product.Previews).OkJSON()
@@ -63,11 +59,10 @@ func (h *Preview) CreateOne(c echo.Context) error {
 	svc := h.svc.AttachEcho(c)
 	psvc := h.psvc.AttachEcho(c)
 	prodId := c.Param("prod-id")
+
 	product, err := psvc.FindByIdWithRelation(prodId, []string{"Previews"})
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
-	} else if err != nil {
-		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	if err != nil {
+		return errorlib.HandleValidateProductOnPreviewError(err, rp)
 	}
 	if len(product.Previews) >= config.MAX_PREVIEW {
 		return rp.Error(replylib.CodeBadRequest, "record: max preview reached").FailJSON()
@@ -79,18 +74,13 @@ func (h *Preview) CreateOne(c echo.Context) error {
 		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 
-	if alt == "" {
-		alt = previewlib.GetFileName(fh.Filename)
-	}
-
-	meta := previewlib.GeneratePreview(fh, alt, prodId, true)
-
-	file, fbyte, err := previewlib.ReadByHeader(fh)
+	fbyte, err := previewlib.ReadByHeader(fh)
 	if err != nil {
 		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
 	}
-	defer file.Close()
-	err = svc.CreatePreview(meta, fbyte)
+
+	meta := previewlib.GeneratePreview(fh, alt, prodId, true)
+	err = svc.CreatePreviewWithFile(meta, fbyte)
 	if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 	}
@@ -104,10 +94,13 @@ func (h *Preview) UpdateOne(c echo.Context) error {
 	psvc := h.psvc.AttachEcho(c)
 	prodId := c.Param("prod-id")
 	id := c.Param("id")
-	if _, err := psvc.FindById(prodId); errors.Is(err, gorm.ErrRecordNotFound) {
-		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
+
+	_, err := psvc.FindById(prodId)
+	if err != nil {
+		return errorlib.HandleValidateProductOnPreviewError(err, rp)
 	}
-	meta, _, err := svc.GetPreview(id, prodId)
+
+	meta, _, err := svc.GetPreviewFile(id, prodId)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
@@ -120,13 +113,12 @@ func (h *Preview) UpdateOne(c echo.Context) error {
 	meta.Alt = alt
 	previewlib.MergePreview(fh, &meta)
 
-	f, b, err := previewlib.ReadByHeader(fh)
+	b, err := previewlib.ReadByHeader(fh)
 	if err != nil {
 		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
 	}
-	defer f.Close()
 
-	err = svc.UpdatePreview(&meta, b)
+	err = svc.UpdatePreviewWithFile(&meta, b)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
@@ -139,11 +131,13 @@ func (h *Preview) DeleteOne(c echo.Context) error {
 	psvc := h.psvc.AttachEcho(c)
 	prodId := c.Param("prod-id")
 	id := c.Param("id")
-	if _, err := psvc.FindById(prodId); errors.Is(err, gorm.ErrRecordNotFound) {
-		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
+
+	_, err := psvc.FindById(prodId)
+	if err != nil {
+		return errorlib.HandleValidateProductOnPreviewError(err, rp)
 	}
 
-	err := svc.DeletePreview(id, prodId)
+	err = svc.DeletePreviewWithFile(id, prodId)
 	if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 	}

@@ -19,6 +19,10 @@ func NewPreview(db *gorm.DB) *Preview {
 	return &Preview{db}
 }
 
+func (r *Preview) DB() *gorm.DB {
+	return r.db
+}
+
 func (r *Preview) WriteFile(path string, content []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err

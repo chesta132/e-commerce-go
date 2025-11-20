@@ -47,6 +47,9 @@ func GeneratePreview(file *multipart.FileHeader, alt, productId string, withId b
 	if ok && len(h) > 0 {
 		mime = h[0]
 	}
+	if alt == "" {
+		alt = GetFileName(file.Filename)
+	}
 	p := &model.Preview{
 		ID: id,
 		// Position:  len(meta.Preview) + 1, // fix auto increm by product id
@@ -89,11 +92,12 @@ func GetHeader(preview model.Preview, additional ...map[string]string) map[strin
 	}
 }
 
-func ReadByHeader(fh *multipart.FileHeader) (multipart.File, []byte, error) {
+func ReadByHeader(fh *multipart.FileHeader) ([]byte, error) {
 	f, err := fh.Open()
 	if err != nil {
-		return f, nil, err
+		return nil, err
 	}
 	b, err := io.ReadAll(f)
-	return f, b, err
+	f.Close()
+	return b, err
 }

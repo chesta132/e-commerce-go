@@ -44,3 +44,10 @@ func HandleGetPreviewError(err error, defaultPreview []byte, rp *reply.Reply) er
 	meta := previewlib.GetDefaultPreview()
 	return rp.Success(defaultPreview).AddHeaders(previewlib.GetHeader(meta, errHeader)).ReplyBinary(404)
 }
+
+func HandleValidateProductOnPreviewError(err error, rp *reply.Reply) error {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
+	}
+	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+}

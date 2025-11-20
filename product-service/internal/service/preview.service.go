@@ -26,18 +26,23 @@ func NewPreview(repoPreview *repo.Preview) *Preview {
 	return &Preview{repoPreview}
 }
 
+func (s *Preview) ReadDefaultPreview() (model.Preview, []byte, error) {
+	content, err := s.tr.ReadFile(config.DEFAULT_PREVIEW_PATH)
+	return previewlib.GetDefaultPreview(), content, err
+}
+
 func (s *Preview) AttachEcho(c echo.Context) *EchoPreview {
 	return &EchoPreview{Preview: *s, ctx: c.Request().Context(), c: c}
 }
 
-func (s *EchoPreview) CreatePreview(preview *model.Preview, content []byte) error {
+func (s *EchoPreview) CreatePreviewWithFile(preview *model.Preview, content []byte) error {
 	if err := s.tr.CreateOne(s.ctx, preview); err != nil {
 		return err
 	}
 	return s.tr.WriteFile(preview.Path, content)
 }
 
-func (s *EchoPreview) GetPreview(id, prodId string) (model.Preview, []byte, error) {
+func (s *EchoPreview) GetPreviewFile(id, prodId string) (model.Preview, []byte, error) {
 	preview, err := s.tr.FindFirst(s.ctx, []squery.Where{{Name: "id", Value: id}, {Name: "product_id", Value: prodId}})
 	if err != nil {
 		return model.Preview{}, nil, err
@@ -51,14 +56,14 @@ func (s *EchoPreview) GetPreview(id, prodId string) (model.Preview, []byte, erro
 	return preview, content, nil
 }
 
-func (s *EchoPreview) UpdatePreview(preview *model.Preview, content []byte) error {
+func (s *EchoPreview) UpdatePreviewWithFile(preview *model.Preview, content []byte) error {
 	if err := s.tr.WriteFile(preview.Path, content); err != nil {
 		return err
 	}
 	return s.tr.UpdateOne(s.ctx, []squery.Where{{Name: "id", Value: preview.ID}}, *preview)
 }
 
-func (s *EchoPreview) DeletePreview(id, prodId string) error {
+func (s *EchoPreview) DeletePreviewWithFile(id, prodId string) error {
 	preview, err := s.tr.FindFirst(s.ctx, []squery.Where{{Name: "id", Value: id}, {Name: "product_id", Value: prodId}})
 	if err != nil {
 		return err
@@ -68,9 +73,4 @@ func (s *EchoPreview) DeletePreview(id, prodId string) error {
 		return err
 	}
 	return s.tr.DeleteOne(s.ctx, []squery.Where{{Name: "id", Value: preview.ID}})
-}
-
-func (s *Preview) ReadDefaultPreview() (model.Preview, []byte, error) {
-	content, err := s.tr.ReadFile(config.DEFAULT_PREVIEW_PATH)
-	return previewlib.GetDefaultPreview(), content, err
 }
