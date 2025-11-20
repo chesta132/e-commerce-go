@@ -1,7 +1,6 @@
 package thumbnaillib
 
 import (
-	"fmt"
 	"io"
 	"mime/multipart"
 	"path/filepath"
@@ -27,7 +26,7 @@ func GetFileName(fileName string) string {
 }
 
 func GetFilePath(thumbnail *model.Thumbnail, productId string) string {
-	return filepath.Join(config.THUMBNAIL_PATH, productId, fmt.Sprintf("%s.%s", thumbnail.ID, thumbnail.Extension))
+	return filepath.Join(config.THUMBNAIL_PATH, productId, thumbnail.ID+thumbnail.Extension)
 }
 
 func GetDirPath(productId string) string {

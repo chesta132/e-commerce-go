@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"errors"
+	"product-service/config"
 	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/replylib"
 	"product-service/internal/lib/thumbnaillib"
@@ -42,13 +43,34 @@ func (h *Thumbnail) GetOne(c echo.Context) error {
 	return rp.AddHeaders(thumbnaillib.GetHeader(meta)).Success(reply.Stream{Data: r, ContentType: meta.Mime}).OkStream()
 }
 
+func (h *Thumbnail) GetInfo(c echo.Context) error {
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	psvc := h.psvc.AttachEcho(c)
+	prodId := c.Param("prod-id")
+
+	product, err := psvc.FindByIdWithRelation(prodId, []string{"Thumbnails"})
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
+	} else if err != nil {
+		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	}
+
+	return rp.Success(product.Thumbnails).OkJSON()
+}
+
 func (h *Thumbnail) CreateOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	svc := h.svc.AttachEcho(c)
 	psvc := h.psvc.AttachEcho(c)
 	prodId := c.Param("prod-id")
-	if _, err := psvc.FindById(prodId); errors.Is(err, gorm.ErrRecordNotFound) {
+	product, err := psvc.FindByIdWithRelation(prodId, []string{"Thumbnails"})
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
+	} else if err != nil {
+		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	}
+	if len(product.Thumbnails) >= config.MAX_THUMBNAIL {
+		return rp.Error(replylib.CodeBadRequest, "record: max thumbnail reached").FailJSON()
 	}
 
 	alt := c.FormValue("alt")
@@ -109,4 +131,22 @@ func (h *Thumbnail) UpdateOne(c echo.Context) error {
 		return errorlib.HandleQueryError(err, rp)
 	}
 	return rp.Success(meta).OkJSON()
+}
+
+func (h *Thumbnail) DeleteOne(c echo.Context) error {
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	svc := h.svc.AttachEcho(c)
+	psvc := h.psvc.AttachEcho(c)
+	prodId := c.Param("prod-id")
+	id := c.Param("id")
+	if _, err := psvc.FindById(prodId); errors.Is(err, gorm.ErrRecordNotFound) {
+		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
+	}
+
+	err := svc.DeleteThumbnail(id, prodId)
+	if err != nil {
+		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	}
+
+	return rp.Success(map[string]string{"id": id}).OkJSON()
 }

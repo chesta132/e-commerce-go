@@ -78,3 +78,12 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 func (s *EchoProduct) FindById(id string) (model.Product, error) {
 	return s.pr.FindFirst(s.ctx, []squery.Where{{Name: "id", Value: id}})
 }
+
+func (s *EchoProduct) FindByIdWithRelation(id string, relations []string) (model.Product, error) {
+	var product model.Product
+	q := s.pr.DB().WithContext(s.ctx).Where("id = ?", id)
+	for _, r := range relations {
+		q.Preload(r)
+	}
+	return product, q.First(&product).Error
+}
