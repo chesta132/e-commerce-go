@@ -5,12 +5,12 @@ import (
 	"product-service/config"
 	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/replylib"
-	"product-service/internal/lib/userlib"
 	"product-service/internal/model"
 	"product-service/internal/service"
 	"strconv"
 	"strings"
 
+	"github.com/chesta132/e-commerce-go/shared/smodel"
 	"github.com/chesta132/e-commerce-go/shared/sreplylib"
 	adapter "github.com/chesta132/goreply/adapter/echo"
 	"github.com/chesta132/goreply/reply"
@@ -64,13 +64,7 @@ func (h *Product) CreateOne(c echo.Context) error {
 		return rp.Error(sreplylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
-	user, cookie, err := userlib.GetAdminDataWithAuth(c.Cookies())
-	if err != nil {
-		return rp.Error(sreplylib.CodeBadGateway, err.Error()).FailJSON()
-	}
-	if cookie != "" {
-		rp.AddHeader("Set-Cookie", cookie)
-	}
+	user := c.Get("user").(*smodel.User)
 
 	product, err := svc.CreateProduct(&payload, user)
 	if err != nil {

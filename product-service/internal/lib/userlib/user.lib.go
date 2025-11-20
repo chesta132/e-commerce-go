@@ -13,8 +13,8 @@ import (
 	"github.com/chesta132/goreply/reply"
 )
 
-func GetAdminDataWithAuth(cookies []*http.Cookie) (user *smodel.User, cookie string, err error) {
-	url := config.USER_SERVICE_URL + "/auth/admin"
+func GetUserData(cookies []*http.Cookie, endpoint string) (user *smodel.User, cookie string, err error) {
+	url := config.USER_SERVICE_URL + endpoint
 
 	jar, err := cookiejar.New(nil)
 	if err != nil {

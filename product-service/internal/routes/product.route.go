@@ -2,6 +2,7 @@ package routes
 
 import (
 	"product-service/internal/handler"
+	"product-service/internal/middleware"
 	"product-service/internal/repo"
 	"product-service/internal/service"
 
@@ -14,7 +15,7 @@ func (rt *Route) RegisterProduct(group *echo.Group) {
 	ph := handler.NewProduct(ps)
 
 	group.GET("/search", ph.SearchByKeyword)
-	group.POST("", ph.CreateOne)
+	group.POST("", middleware.AdminOnly(ph.CreateOne))
 
 	pgroup := group.Group("/:prod-id/previews")
 	rt.RegisterPreview(pgroup, ps)
