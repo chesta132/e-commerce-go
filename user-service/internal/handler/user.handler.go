@@ -6,6 +6,7 @@ import (
 	"user-service/internal/lib/replylib"
 	"user-service/internal/service"
 
+	"github.com/chesta132/e-commerce-go/shared/sreplylib"
 	adapter "github.com/chesta132/goreply/adapter/echo"
 	"github.com/chesta132/goreply/reply"
 	"github.com/labstack/echo/v4"
@@ -24,7 +25,7 @@ func (h *User) GetOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	u, ok := c.Get("user").(user.User)
 	if !ok {
-		return rp.Error(replylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
+		return rp.Error(sreplylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
 	}
 	svc := h.us.AttachEcho(c)
 
@@ -40,13 +41,13 @@ func (h *User) UpdateOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	u, ok := c.Get("user").(user.User)
 	if !ok {
-		return rp.Error(replylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
+		return rp.Error(sreplylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
 	}
 	svc := h.us.AttachEcho(c)
 
 	updt := user.User{}
 	if err := c.Bind(&updt); err != nil {
-		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
+		return rp.Error(sreplylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
 	u, err := svc.FindByIdAndUpdate(u.ID, user.User{Address: updt.Address, FullName: updt.FullName})

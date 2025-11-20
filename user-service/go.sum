@@ -1,3 +1,5 @@
+github.com/chesta132/e-commerce-go/shared v0.0.0-20251120124548-4922fa926195 h1:41cy84j5BaiNgXIrBcp1uoEJGU6yGjT3aWmK7bmt/X0=
+github.com/chesta132/e-commerce-go/shared v0.0.0-20251120124548-4922fa926195/go.mod h1:7JF22uXJQWUm4ioVd3MM0EMD9AFiOxajyPRVSPCACpg=
 github.com/chesta132/goreply v0.0.7 h1:7UNa4NcC7VHI63sgBIyvQ585uThtNGn4XXaOJVJVRh0=
 github.com/chesta132/goreply v0.0.7/go.mod h1:7rcFTuTsOVoBpLUo0KvMu9AWAlaN3cRGpwxtwbkLZP0=
 github.com/chesta132/goreply/adapter/echo v0.0.0-20251111135539-eee1ae914f1a h1:V1MrQrDcGDgXC3Iyd2MQggEltCVBAHicFtL7/qmwesE=

@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/chesta132/e-commerce-go/shared v0.0.0-20251120124548-4922fa926195 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

@@ -3,9 +3,9 @@ package errorlib
 import (
 	"errors"
 	"product-service/internal/lib/previewlib"
-	"product-service/internal/lib/replylib"
 	"strings"
 
+	"github.com/chesta132/e-commerce-go/shared/sreplylib"
 	"github.com/chesta132/goreply/reply"
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
@@ -13,9 +13,9 @@ import (
 
 func HandleQueryError(err error, rp *reply.Reply) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return rp.Error(replylib.CodeNotFound, err.Error()).FailJSON()
+		return rp.Error(sreplylib.CodeNotFound, err.Error()).FailJSON()
 	}
-	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
 }
 
 func HandleValidateError(err validator.ValidationErrors, rp *reply.Reply) error {
@@ -23,7 +23,7 @@ func HandleValidateError(err validator.ValidationErrors, rp *reply.Reply) error 
 	for _, fe := range err {
 		fields = append(fields, fe.Field())
 	}
-	return rp.Error(replylib.CodeBadRequest, err.Error(), reply.OptErrorPayload{Field: strings.Join(fields, ", ")}).FailJSON()
+	return rp.Error(sreplylib.CodeBadRequest, err.Error(), reply.OptErrorPayload{Field: strings.Join(fields, ", ")}).FailJSON()
 }
 
 func HandleCreateProductError(err error, rp *reply.Reply) error {
@@ -31,9 +31,9 @@ func HandleCreateProductError(err error, rp *reply.Reply) error {
 		return HandleValidateError(err, rp)
 	}
 	if errors.Is(err, ErrNoCategoryToCreate) {
-		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
+		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
 	}
-	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
 }
 
 func HandleGetPreviewError(err error, defaultPreview []byte, rp *reply.Reply) error {
@@ -47,7 +47,7 @@ func HandleGetPreviewError(err error, defaultPreview []byte, rp *reply.Reply) er
 
 func HandleValidateProductOnPreviewError(err error, rp *reply.Reply) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
+		return rp.Error(sreplylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
 	}
-	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+	return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
 }

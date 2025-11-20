@@ -3,7 +3,7 @@ module product-service
 go 1.25.0
 
 require (
-	github.com/chesta132/e-commerce-go/shared v0.0.0-20251118140756-dec6a3e99d9e
+	github.com/chesta132/e-commerce-go/shared v0.0.0-20251120124548-4922fa926195
 	github.com/chesta132/goreply v0.0.7
 	github.com/chesta132/goreply/adapter/echo v0.0.0-20251113152508-e05e5b4010bd
 	github.com/go-playground/validator/v10 v10.28.0

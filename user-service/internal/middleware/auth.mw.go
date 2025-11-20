@@ -9,6 +9,7 @@ import (
 	"user-service/internal/lib/token"
 	"user-service/internal/service"
 
+	"github.com/chesta132/e-commerce-go/shared/sreplylib"
 	adapter "github.com/chesta132/goreply/adapter/echo"
 	"github.com/labstack/echo/v4"
 )
@@ -31,16 +32,16 @@ func (s *Auth) Protected(next echo.HandlerFunc) echo.HandlerFunc {
 			if errors.Is(err, http.ErrNoCookie) {
 				ac = &http.Cookie{}
 			} else {
-				return rp.Error(replylib.CodeUnauthorized, err.Error()).FailJSON()
+				return rp.Error(sreplylib.CodeUnauthorized, err.Error()).FailJSON()
 			}
 		}
 
 		rc, err := c.Cookie(config.REFRESH_TOKEN_KEY)
 		if errors.Is(err, http.ErrNoCookie) {
-			return rp.Error(replylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
+			return rp.Error(sreplylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
 		}
 		if err != nil {
-			return rp.Error(replylib.CodeUnauthorized, err.Error()).FailJSON()
+			return rp.Error(sreplylib.CodeUnauthorized, err.Error()).FailJSON()
 		}
 
 		user, na, nc, err := svc.ValidateAuth(ac.Value, rc.Value)

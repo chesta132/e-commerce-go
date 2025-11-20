@@ -5,6 +5,7 @@ import (
 	"user-service/internal/lib/errorlib"
 	"user-service/internal/lib/replylib"
 
+	"github.com/chesta132/e-commerce-go/shared/sreplylib"
 	adapter "github.com/chesta132/goreply/adapter/echo"
 	"github.com/labstack/echo/v4"
 )
@@ -14,11 +15,11 @@ func AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 		rp := replylib.Client.New(adapter.AdaptEcho(c))
 		user, ok := c.Get("user").(user.User)
 		if !ok {
-			return rp.Error(replylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
+			return rp.Error(sreplylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
 		}
 
 		if user.Role != "admin" {
-			return rp.Error(replylib.CodeUnauthorized, errorlib.ErrAdminOnly.Error()).FailJSON()
+			return rp.Error(sreplylib.CodeUnauthorized, errorlib.ErrAdminOnly.Error()).FailJSON()
 		}
 
 		return next(c)

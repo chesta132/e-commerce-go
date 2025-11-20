@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/chesta132/e-commerce-go/shared/sreplylib"
 	adapter "github.com/chesta132/goreply/adapter/echo"
 	"github.com/chesta132/goreply/reply"
 	"github.com/labstack/echo/v4"
@@ -38,14 +39,14 @@ func (h *Product) SearchByKeyword(c echo.Context) error {
 		keyword = strings.TrimSpace(c.QueryParam(v))
 		if keyword == "" && i == len(config.KEYWORD_QUERY)-1 {
 			return rp.
-				Error(replylib.CodeBadRequest, fmt.Sprintf("payload: %s not found in query", strings.Join(config.KEYWORD_QUERY, " | "))).
+				Error(sreplylib.CodeBadRequest, fmt.Sprintf("payload: %s not found in query", strings.Join(config.KEYWORD_QUERY, " | "))).
 				FailJSON()
 		}
 	}
 
 	products, nfCatIds, err := svc.SearchByKeyword(keyword, offset, categoryIds)
 	if err != nil {
-		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
+		return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
 	}
 	if len(nfCatIds) > 0 {
 		rp.Info(fmt.Sprintf("Category(s) with id (%s) not found", strings.Join(nfCatIds, " | ")))
@@ -60,12 +61,12 @@ func (h *Product) CreateOne(c echo.Context) error {
 
 	payload := model.CreateProductPayload{}
 	if err := c.Bind(&payload); err != nil {
-		return rp.Error(replylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
+		return rp.Error(sreplylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
 	user, cookie, err := userlib.GetAdminDataWithAuth(c.Cookies())
 	if err != nil {
-		return rp.Error(replylib.CodeBadGateway, err.Error()).FailJSON()
+		return rp.Error(sreplylib.CodeBadGateway, err.Error()).FailJSON()
 	}
 	if cookie != "" {
 		rp.AddHeader("Set-Cookie", cookie)
