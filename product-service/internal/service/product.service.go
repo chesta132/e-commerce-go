@@ -10,6 +10,7 @@ import (
 	"product-service/internal/repo"
 
 	"github.com/chesta132/e-commerce-go/shared/smodel"
+	"github.com/chesta132/e-commerce-go/shared/squery"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -72,4 +73,8 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		return pr.CreateOne(s.ctx, data)
 	})
 	return data, err
+}
+
+func (s *EchoProduct) FindById(id string) (model.Product, error) {
+	return s.pr.FindFirst(s.ctx, []squery.Where{{Name: "id", Value: id}})
 }

@@ -1,17 +1,18 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type Thumbnail struct {
-	ID        string    `json:"id"`
-	Position  int       `json:"position"`
-	Extension string    `json:"extension"`
-	Path      string    `json:"path"`
+	ID        string `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
+	Position  int    `json:"position"`
+	Extension string `json:"extension"`
+	Alt       string `json:"alt"`
+	Mime      string `json:"mime"`
+	Path      string `json:"-"`
+
+	ProductId string    `json:"productId"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-}
-
-type ThumbnailMeta struct {
-	Thumbnails []*Thumbnail `json:"thumbnails"`
-	ProjectId  string       `json:"projectId"`
 }

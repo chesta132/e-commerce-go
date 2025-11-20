@@ -1,5 +1,5 @@
-github.com/chesta132/e-commerce-go/shared v0.0.0-20251117104927-c155cdde1cbc h1:vUi3UJ/afm06I95BGwdpbvc9rBPQReKayCpe2HITWbg=
-github.com/chesta132/e-commerce-go/shared v0.0.0-20251117104927-c155cdde1cbc/go.mod h1:7JF22uXJQWUm4ioVd3MM0EMD9AFiOxajyPRVSPCACpg=
+github.com/chesta132/e-commerce-go/shared v0.0.0-20251118140756-dec6a3e99d9e h1:yzSK4r9vT/vHDuupGois1DATDEZktVw92R0NPbSvivQ=
+github.com/chesta132/e-commerce-go/shared v0.0.0-20251118140756-dec6a3e99d9e/go.mod h1:7JF22uXJQWUm4ioVd3MM0EMD9AFiOxajyPRVSPCACpg=
 github.com/chesta132/goreply v0.0.7 h1:7UNa4NcC7VHI63sgBIyvQ585uThtNGn4XXaOJVJVRh0=
 github.com/chesta132/goreply v0.0.7/go.mod h1:7rcFTuTsOVoBpLUo0KvMu9AWAlaN3cRGpwxtwbkLZP0=
 github.com/chesta132/goreply/adapter/echo v0.0.0-20251113152508-e05e5b4010bd h1:4XQ4/yaDmfCVvGCPAEjF+bl8mo6KJEYdKIoi5XBk05k=
@@ -59,8 +59,7 @@ golang.org/x/net v0.43.0/go.mod h1:vhO1fvI4dGsIjh73sWfUVjj3N7CA9WkKJNQm2svM6Jg=
 golang.org/x/sync v0.17.0 h1:l60nONMj9l5drqw6jlhIELNv9I0A4OFgRsG9k2oT9Ug=
 golang.org/x/sync v0.17.0/go.mod h1:9KTHXmSnoGruLpwFjVSX0lNNA75CykiMECbovNTZqGI=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.36.0 h1:KVRy2GtZBrk1cBYA7MKu5bEZFxQk4NIDV6RLVcC8o0k=
-golang.org/x/sys v0.36.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
+golang.org/x/sys v0.37.0 h1:fdNQudmxPjkdUTPnLn5mdQv7Zwvbvpaxqs831goi9kQ=
 golang.org/x/sys v0.37.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
 golang.org/x/text v0.29.0 h1:1neNs90w9YzJ9BocxfsQNHKuAT4pkghyXc4nhZ6sJvk=
 golang.org/x/text v0.29.0/go.mod h1:7MhJOA9CD2qZyOKYazxdYMF85OwPdEr9jTtBpO7ydH4=
