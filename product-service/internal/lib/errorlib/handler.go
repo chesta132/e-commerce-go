@@ -2,8 +2,8 @@ package errorlib
 
 import (
 	"errors"
+	"product-service/internal/lib/previewlib"
 	"product-service/internal/lib/replylib"
-	"product-service/internal/lib/thumbnaillib"
 	"strings"
 
 	"github.com/chesta132/goreply/reply"
@@ -36,11 +36,11 @@ func HandleCreateProductError(err error, rp *reply.Reply) error {
 	return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 }
 
-func HandleGetThumbnailError(err error, defaultThumb []byte, rp *reply.Reply) error {
+func HandleGetPreviewError(err error, defaultPreview []byte, rp *reply.Reply) error {
 	errHeader := map[string]string{"X-Error": err.Error()}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		errHeader["X-Error"] = "record: thumbnail not found, fallback to default thumbnail"
+		errHeader["X-Error"] = "record: preview not found, fallback to default preview"
 	}
-	meta := thumbnaillib.GetDefaultThumbnail()
-	return rp.Success(defaultThumb).AddHeaders(thumbnaillib.GetHeader(meta, errHeader)).ReplyBinary(404)
+	meta := previewlib.GetDefaultPreview()
+	return rp.Success(defaultPreview).AddHeaders(previewlib.GetHeader(meta, errHeader)).ReplyBinary(404)
 }

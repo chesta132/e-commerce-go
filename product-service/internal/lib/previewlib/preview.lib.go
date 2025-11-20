@@ -1,4 +1,4 @@
-package thumbnaillib
+package previewlib
 
 import (
 	"io"
@@ -25,19 +25,19 @@ func GetFileName(fileName string) string {
 	return fileName
 }
 
-func GetFilePath(thumbnail *model.Thumbnail, productId string) string {
-	return filepath.Join(config.THUMBNAIL_PATH, productId, thumbnail.ID+thumbnail.Extension)
+func GetFilePath(preview *model.Preview, productId string) string {
+	return filepath.Join(config.PREVIEW_PATH, productId, preview.ID+preview.Extension)
 }
 
 func GetDirPath(productId string) string {
-	return filepath.Join(config.THUMBNAIL_PATH, productId)
+	return filepath.Join(config.PREVIEW_PATH, productId)
 }
 
 func GetMetaPath(productId string) string {
 	return filepath.Join(GetDirPath(productId), "meta.json")
 }
 
-func GenerateThumbnail(file *multipart.FileHeader, alt, productId string, withId bool) *model.Thumbnail {
+func GeneratePreview(file *multipart.FileHeader, alt, productId string, withId bool) *model.Preview {
 	id := ""
 	if withId {
 		id = uuid.NewString()
@@ -47,45 +47,45 @@ func GenerateThumbnail(file *multipart.FileHeader, alt, productId string, withId
 	if ok && len(h) > 0 {
 		mime = h[0]
 	}
-	t := &model.Thumbnail{
+	p := &model.Preview{
 		ID: id,
-		// Position:  len(meta.Thumbnails) + 1, // fix auto increm by product id
+		// Position:  len(meta.Preview) + 1, // fix auto increm by product id
 		Extension: filepath.Ext(file.Filename),
 		Alt:       alt,
 		ProductId: productId,
 		Mime:      mime,
 	}
-	t.Path = GetFilePath(t, productId)
-	return t
+	p.Path = GetFilePath(p, productId)
+	return p
 }
 
-func MergeThumbnail(file *multipart.FileHeader, thumbnail *model.Thumbnail) {
+func MergePreview(file *multipart.FileHeader, preview *model.Preview) {
 	mime := ""
 	h, ok := file.Header["Content-Type"]
 	if ok && len(h) > 0 {
 		mime = h[0]
 	}
 
-	thumbnail.Extension = filepath.Ext(file.Filename)
-	thumbnail.Path = GetFilePath(thumbnail, thumbnail.ProductId)
-	thumbnail.Mime = mime
+	preview.Extension = filepath.Ext(file.Filename)
+	preview.Path = GetFilePath(preview, preview.ProductId)
+	preview.Mime = mime
 }
 
-func GetDefaultThumbnail() model.Thumbnail {
-	path := config.DEFAULT_THUMBNAIL_PATH
-	return model.Thumbnail{
+func GetDefaultPreview() model.Preview {
+	path := config.DEFAULT_PREVIEW_PATH
+	return model.Preview{
 		ID:        path,
 		Extension: filepath.Ext(path),
 		Path:      path,
-		Alt:       "default thumbnail",
+		Alt:       "default preview",
 		Mime:      "image/png",
 	}
 }
 
-func GetHeader(thumbnail model.Thumbnail, additional ...map[string]string) map[string]string {
+func GetHeader(preview model.Preview, additional ...map[string]string) map[string]string {
 	return map[string]string{
-		"Content-Type":    thumbnail.Mime,
-		"X-Thumbnail-Alt": thumbnail.Alt,
+		"Content-Type":  preview.Mime,
+		"X-Preview-Alt": preview.Alt,
 	}
 }
 

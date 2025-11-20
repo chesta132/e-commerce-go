@@ -1,3 +1,3 @@
 *.env
-uploads/products/thumbnails/*
-!uploads/products/thumbnails/default_product_img.png
+uploads/products/previews/*
+!uploads/products/previews/default_product_img.png

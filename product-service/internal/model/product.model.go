@@ -14,9 +14,9 @@ type Product struct {
 	MetaId string      `gorm:"unique" json:"metaId"`
 	Meta   ProductMeta `gorm:"foreignKey:MetaId;constraint:OnDelete:CASCADE" json:"meta,omitzero"`
 
-	Thumbnails []Thumbnail `gorm:"constraint:OnDelete:CASCADE;" json:"thumbnails,omitempty"`
-	Categories []Category  `gorm:"many2many:product_categories" json:"categories,omitempty"`
-	AdminId    string      `json:"adminId" gorm:"index"`
+	Previews   []Preview  `gorm:"constraint:OnDelete:CASCADE;" json:"previews,omitempty"`
+	Categories []Category `gorm:"many2many:product_categories" json:"categories,omitempty"`
+	AdminId    string     `json:"adminId" gorm:"index"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`

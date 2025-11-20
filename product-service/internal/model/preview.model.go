@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Thumbnail struct {
+type Preview struct {
 	ID        string `gorm:"primarykey;default:gen_random_uuid()" json:"id"`
 	Position  int    `json:"position"`
 	Extension string `json:"extension"`

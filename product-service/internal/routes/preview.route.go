@@ -10,10 +10,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func (rt *Route) RegisterThumbnail(group *echo.Group, prodSvc *service.Product) {
-	r := repo.NewThumbnail(rt.db)
-	svc := service.NewThumbnail(r)
-	h := handler.NewThumbnail(svc, prodSvc)
+func (rt *Route) RegisterPreview(group *echo.Group, prodSvc *service.Product) {
+	r := repo.NewPreview(rt.db)
+	svc := service.NewPreview(r)
+	h := handler.NewPreview(svc, prodSvc)
 
 	group.GET("", h.GetInfo)
 
@@ -22,7 +22,7 @@ func (rt *Route) RegisterThumbnail(group *echo.Group, prodSvc *service.Product) 
 	group.DELETE("/:id", h.DeleteOne)
 
 	group.Use(middleware.BodyLimitWithConfig(middleware.BodyLimitConfig{
-		Limit: config.MAX_THUMBNAIL_SIZE,
+		Limit: config.MAX_PREVIEW_SIZE,
 	}))
 	group.POST("", h.CreateOne)
 }

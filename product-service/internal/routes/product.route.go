@@ -16,7 +16,7 @@ func (rt *Route) RegisterProduct(group *echo.Group) {
 	group.GET("/search", ph.SearchByKeyword)
 	group.POST("", ph.CreateOne)
 
-	thumbGroup := group.Group("/:prod-id/thumbnails")
-	rt.RegisterThumbnail(thumbGroup, ps)
-	thumbGroup.Any("/*", handler.NotFound)
+	pgroup := group.Group("/:prod-id/previews")
+	rt.RegisterPreview(pgroup, ps)
+	pgroup.Any("/*", handler.NotFound)
 }

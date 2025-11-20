@@ -5,8 +5,8 @@ import (
 	"errors"
 	"product-service/config"
 	"product-service/internal/lib/errorlib"
+	"product-service/internal/lib/previewlib"
 	"product-service/internal/lib/replylib"
-	"product-service/internal/lib/thumbnaillib"
 	"product-service/internal/service"
 
 	adapter "github.com/chesta132/goreply/adapter/echo"
@@ -15,62 +15,62 @@ import (
 	"gorm.io/gorm"
 )
 
-type Thumbnail struct {
-	svc  *service.Thumbnail
+type Preview struct {
+	svc  *service.Preview
 	psvc *service.Product
 }
 
-func NewThumbnail(svc *service.Thumbnail, psvc *service.Product) *Thumbnail {
-	return &Thumbnail{svc, psvc}
+func NewPreview(svc *service.Preview, psvc *service.Product) *Preview {
+	return &Preview{svc, psvc}
 }
 
-func (h *Thumbnail) GetOne(c echo.Context) error {
+func (h *Preview) GetOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	svc := h.svc.AttachEcho(c)
 	prodId := c.Param("prod-id")
 	id := c.Param("id")
 
-	meta, thumb, err := svc.GetThumbnail(id, prodId)
+	meta, preview, err := svc.GetPreview(id, prodId)
 	if err != nil {
-		_, t, e := svc.ReadDefaultThumbnail()
+		_, p, e := svc.ReadDefaultPreview()
 		if e != nil {
-			return rp.Error(replylib.CodeServerError, e.Error()).Info("Error while read default thumbnail").FailJSON()
+			return rp.Error(replylib.CodeServerError, e.Error()).Info("Error while read default preview").FailJSON()
 		}
-		return errorlib.HandleGetThumbnailError(err, t, rp)
+		return errorlib.HandleGetPreviewError(err, p, rp)
 	}
 
-	r := bytes.NewReader(thumb)
-	return rp.AddHeaders(thumbnaillib.GetHeader(meta)).Success(reply.Stream{Data: r, ContentType: meta.Mime}).OkStream()
+	r := bytes.NewReader(preview)
+	return rp.AddHeaders(previewlib.GetHeader(meta)).Success(reply.Stream{Data: r, ContentType: meta.Mime}).OkStream()
 }
 
-func (h *Thumbnail) GetInfo(c echo.Context) error {
+func (h *Preview) GetInfo(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	psvc := h.psvc.AttachEcho(c)
 	prodId := c.Param("prod-id")
 
-	product, err := psvc.FindByIdWithRelation(prodId, []string{"Thumbnails"})
+	product, err := psvc.FindByIdWithRelation(prodId, []string{"Previews"})
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
 	} else if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 	}
 
-	return rp.Success(product.Thumbnails).OkJSON()
+	return rp.Success(product.Previews).OkJSON()
 }
 
-func (h *Thumbnail) CreateOne(c echo.Context) error {
+func (h *Preview) CreateOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	svc := h.svc.AttachEcho(c)
 	psvc := h.psvc.AttachEcho(c)
 	prodId := c.Param("prod-id")
-	product, err := psvc.FindByIdWithRelation(prodId, []string{"Thumbnails"})
+	product, err := psvc.FindByIdWithRelation(prodId, []string{"Previews"})
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
 	} else if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 	}
-	if len(product.Thumbnails) >= config.MAX_THUMBNAIL {
-		return rp.Error(replylib.CodeBadRequest, "record: max thumbnail reached").FailJSON()
+	if len(product.Previews) >= config.MAX_PREVIEW {
+		return rp.Error(replylib.CodeBadRequest, "record: max preview reached").FailJSON()
 	}
 
 	alt := c.FormValue("alt")
@@ -80,17 +80,17 @@ func (h *Thumbnail) CreateOne(c echo.Context) error {
 	}
 
 	if alt == "" {
-		alt = thumbnaillib.GetFileName(fh.Filename)
+		alt = previewlib.GetFileName(fh.Filename)
 	}
 
-	meta := thumbnaillib.GenerateThumbnail(fh, alt, prodId, true)
+	meta := previewlib.GeneratePreview(fh, alt, prodId, true)
 
-	file, fbyte, err := thumbnaillib.ReadByHeader(fh)
+	file, fbyte, err := previewlib.ReadByHeader(fh)
 	if err != nil {
 		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 	defer file.Close()
-	err = svc.CreateThumbnail(meta, fbyte)
+	err = svc.CreatePreview(meta, fbyte)
 	if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 	}
@@ -98,7 +98,7 @@ func (h *Thumbnail) CreateOne(c echo.Context) error {
 	return rp.Success(meta).CreatedJSON()
 }
 
-func (h *Thumbnail) UpdateOne(c echo.Context) error {
+func (h *Preview) UpdateOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	svc := h.svc.AttachEcho(c)
 	psvc := h.psvc.AttachEcho(c)
@@ -107,7 +107,7 @@ func (h *Thumbnail) UpdateOne(c echo.Context) error {
 	if _, err := psvc.FindById(prodId); errors.Is(err, gorm.ErrRecordNotFound) {
 		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
 	}
-	meta, _, err := svc.GetThumbnail(id, prodId)
+	meta, _, err := svc.GetPreview(id, prodId)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
@@ -118,22 +118,22 @@ func (h *Thumbnail) UpdateOne(c echo.Context) error {
 	}
 	alt := c.FormValue("alt")
 	meta.Alt = alt
-	thumbnaillib.MergeThumbnail(fh, &meta)
+	previewlib.MergePreview(fh, &meta)
 
-	f, b, err := thumbnaillib.ReadByHeader(fh)
+	f, b, err := previewlib.ReadByHeader(fh)
 	if err != nil {
 		return rp.Error(replylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 	defer f.Close()
 
-	err = svc.UpdateThumbnail(&meta, b)
+	err = svc.UpdatePreview(&meta, b)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
 	return rp.Success(meta).OkJSON()
 }
 
-func (h *Thumbnail) DeleteOne(c echo.Context) error {
+func (h *Preview) DeleteOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	svc := h.svc.AttachEcho(c)
 	psvc := h.psvc.AttachEcho(c)
@@ -143,7 +143,7 @@ func (h *Thumbnail) DeleteOne(c echo.Context) error {
 		return rp.Error(replylib.CodeBadRequest, "record: product with requested id not found").FailJSON()
 	}
 
-	err := svc.DeleteThumbnail(id, prodId)
+	err := svc.DeletePreview(id, prodId)
 	if err != nil {
 		return rp.Error(replylib.CodeServerError, err.Error()).FailJSON()
 	}
