@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"user-service/db/user"
-	"user-service/internal/lib/query"
 	"user-service/internal/repo"
 
+	"github.com/chesta132/e-commerce-go/shared/squery"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,7 +32,7 @@ func (s *EchoUser) FindById(id string) (user.User, error) {
 }
 
 func (s *EchoUser) UpdateById(id string, u user.User) error {
-	return s.r.UpdateOne(s.ctx, []query.Where{{Name: "id", Value: id}}, u)
+	return s.r.UpdateOne(s.ctx, []squery.Where{{Name: "id", Value: id}}, u)
 }
 
 func (s *EchoUser) FindByIdAndUpdate(id string, u user.User) (user.User, error) {

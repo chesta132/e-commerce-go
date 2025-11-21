@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"time"
+	"user-service/config"
 	"user-service/internal/lib/errorlib"
 	"user-service/internal/lib/replylib"
 	"user-service/internal/lib/token"
@@ -59,4 +61,17 @@ func (h *Auth) Signup(c echo.Context) error {
 		token.CreateAccessCookie(u, p.RememberMe),
 		token.CreateRefreshCookie(u, p.RememberMe),
 	).OkJSON()
+}
+
+func (h *Auth) Signout(c echo.Context) error {
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+
+	keys := []string{config.ACCESS_TOKEN_KEY, config.REFRESH_TOKEN_KEY}
+	for _, k := range keys {
+		c := token.ToCookie(k, "", -24*time.Hour)
+		rp.SetCookies(c)
+	}
+
+	rp.NoContent()
+	return nil
 }

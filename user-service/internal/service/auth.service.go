@@ -6,12 +6,12 @@ import (
 	"user-service/db/user"
 	"user-service/internal/lib/crypto"
 	"user-service/internal/lib/errorlib"
-	"user-service/internal/lib/query"
 	"user-service/internal/lib/token"
 	"user-service/internal/lib/validatorlib"
 	"user-service/internal/model"
 	"user-service/internal/repo"
 
+	"github.com/chesta132/e-commerce-go/shared/squery"
 	"github.com/labstack/echo/v4"
 )
 
@@ -40,7 +40,7 @@ func (s *EchoAuth) Signin(payload *model.SigninPayload) (user.User, error) {
 		return user.User{}, err
 	}
 
-	u, err := s.ur.FindFirst(s.ctx, []query.Where{{Name: "email", Value: payload.Email}})
+	u, err := s.ur.FindFirst(s.ctx, []squery.Where{{Name: "email", Value: payload.Email}})
 	if err != nil {
 		return user.User{}, err
 	}
@@ -57,7 +57,7 @@ func (s *EchoAuth) Signup(payload *model.SignupPayload) (user.User, error) {
 		return user.User{}, err
 	}
 
-	_, err = s.ur.FindFirst(s.ctx, []query.Where{{Name: "email", Value: payload.Email}})
+	_, err = s.ur.FindFirst(s.ctx, []squery.Where{{Name: "email", Value: payload.Email}})
 	if err == nil {
 		return user.User{}, errorlib.ErrEmailRegistered
 	}
