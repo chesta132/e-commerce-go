@@ -12,7 +12,7 @@ import (
 func AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		rp := replylib.Client.New(adapter.AdaptEcho(c))
-		admin, cookie, err := userlib.GetUserData(c.Cookies(), "/auth/admin")
+		admin, cookie, err := userlib.GetUserData(c.Cookies(), "/user/admin")
 		if err != nil {
 			return rp.Error(sreplylib.CodeBadGateway, err.Error()).FailJSON()
 		}

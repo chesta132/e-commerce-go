@@ -25,4 +25,5 @@ func (rt *Route) RegisterUser(g *echo.Group) {
 	g.Use(mw.Protected)
 	g.GET("", uh.GetOne)
 	g.PUT("", uh.UpdateOne)
+	g.GET("/admin", middleware.AdminOnly(uh.GetOne))
 }

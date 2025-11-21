@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"user-service/db/user"
 	"user-service/internal/lib/errorlib"
 	"user-service/internal/lib/replylib"
 	"user-service/internal/lib/token"
@@ -60,13 +59,4 @@ func (h *Auth) Signup(c echo.Context) error {
 		token.CreateAccessCookie(u, p.RememberMe),
 		token.CreateRefreshCookie(u, p.RememberMe),
 	).OkJSON()
-}
-
-func (h *Auth) TokenValid(c echo.Context) error {
-	rp := replylib.Client.New(adapter.AdaptEcho(c))
-	user, ok := c.Get("user").(user.User)
-	if !ok {
-		return rp.Error(sreplylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
-	}
-	return rp.Success(user).OkJSON()
 }
