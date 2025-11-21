@@ -2,11 +2,15 @@ package service
 
 import (
 	"context"
+	"mime/multipart"
 	"os"
+	"path/filepath"
 	"product-service/config"
+	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/previewlib"
 	"product-service/internal/model"
 	"product-service/internal/repo"
+	"slices"
 
 	"github.com/chesta132/e-commerce-go/shared/squery"
 	"github.com/labstack/echo/v4"
@@ -73,4 +77,19 @@ func (s *EchoPreview) DeletePreviewWithFile(id, prodId string) error {
 		return err
 	}
 	return s.tr.DeleteOne(s.ctx, []squery.Where{{Name: "id", Value: preview.ID}})
+}
+
+func (s *EchoPreview) ResizePreview(file *multipart.FileHeader) ([]byte, error) {
+	src, _ := file.Open()
+	defer src.Close()
+
+	ext := filepath.Ext(file.Filename)
+
+	if slices.Contains(config.ALLOWED_PREVIEW_IMAGE_EXTENSION, ext) {
+		return previewlib.ResizeImage(src)
+	} else if slices.Contains(config.ALLOWED_PREVIEW_VIDEO_EXTENSION, ext) {
+		return previewlib.ResizeVideo(src, ext)
+	}
+
+	return nil, errorlib.ErrInvalidPreviewExt
 }

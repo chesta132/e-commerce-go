@@ -75,7 +75,7 @@ func (h *Preview) CreateOne(c echo.Context) error {
 		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 
-	fbyte, err := previewlib.ReadByHeader(fh)
+	fbyte, err := svc.ResizePreview(fh)
 	if err != nil {
 		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
 	}
@@ -114,7 +114,7 @@ func (h *Preview) UpdateOne(c echo.Context) error {
 	meta.Alt = alt
 	previewlib.MergePreview(fh, &meta)
 
-	b, err := previewlib.ReadByHeader(fh)
+	b, err := svc.ResizePreview(fh)
 	if err != nil {
 		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
 	}

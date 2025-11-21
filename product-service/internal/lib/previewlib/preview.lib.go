@@ -1,14 +1,19 @@
 package previewlib
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"mime/multipart"
+	"os"
 	"path/filepath"
 	"product-service/config"
 	"product-service/internal/model"
 	"strings"
 
+	"github.com/disintegration/imaging"
 	"github.com/google/uuid"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
 // returns "" if file name is not a valid file name
@@ -92,12 +97,49 @@ func GetHeader(preview model.Preview, additional ...map[string]string) map[strin
 	}
 }
 
-func ReadByHeader(fh *multipart.FileHeader) ([]byte, error) {
-	f, err := fh.Open()
+func ResizeImage(src multipart.File) ([]byte, error) {
+	img, _ := imaging.Decode(src)
+	resized := imaging.Resize(img, config.MAX_IMAGE_WIDTH, 0, imaging.Lanczos)
+
+	out := new(bytes.Buffer)
+	imaging.Encode(out, resized, imaging.JPEG)
+
+	return out.Bytes(), nil
+}
+
+func ResizeVideo(src multipart.File, ext string) ([]byte, error) {
+	tmp, err := os.CreateTemp("", "upload-*"+ext)
 	if err != nil {
 		return nil, err
 	}
-	b, err := io.ReadAll(f)
-	f.Close()
-	return b, err
+	defer os.Remove(tmp.Name())
+
+	_, err = io.Copy(tmp, src)
+	if err != nil {
+		return nil, err
+	}
+	tmp.Close()
+
+	outPath := "/tmp/ffmpeg-" + uuid.NewString() + ".mp4"
+
+	err = ffmpeg.Input(tmp.Name()).
+		Output(outPath, ffmpeg.KwArgs{
+			"vf":  fmt.Sprintf("scale=%d:trunc(ow/a/2)*2", config.MAX_VIDEO_WIDTH),
+			"c:v": "libx264",
+		}).
+		OverWriteOutput().
+		WithErrorOutput(os.Stderr).
+		Run()
+
+	if err != nil {
+		return nil, fmt.Errorf("ffmpeg error: %w", err)
+	}
+
+	out, err := os.ReadFile(outPath)
+	if err != nil {
+		return nil, err
+	}
+	os.Remove(outPath)
+
+	return out, nil
 }
