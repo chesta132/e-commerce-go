@@ -120,7 +120,7 @@ func ResizeVideo(src multipart.File, ext string) ([]byte, error) {
 	}
 	tmp.Close()
 
-	outPath := "/tmp/ffmpeg-" + uuid.NewString() + ".mp4"
+	outPath := "/tmp/ffmpeg-" + uuid.NewString() + ext
 
 	err = ffmpeg.Input(tmp.Name()).
 		Output(outPath, ffmpeg.KwArgs{
