@@ -27,14 +27,7 @@ func (h *User) GetOne(c echo.Context) error {
 	if !ok {
 		return rp.Error(sreplylib.CodeUnauthorized, errorlib.ErrInvalidToken.Error()).FailJSON()
 	}
-	svc := h.us.AttachEcho(c)
-
-	user, err := svc.FindById(u.ID)
-	if err != nil {
-		return errorlib.HandleQueryError(err, rp)
-	}
-
-	return rp.Success(user).OkJSON()
+	return rp.Success(u).OkJSON()
 }
 
 func (h *User) UpdateOne(c echo.Context) error {
