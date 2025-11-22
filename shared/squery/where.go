@@ -2,6 +2,7 @@ package squery
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -32,10 +33,15 @@ func BuildWhere(where []Where) (q string, v []any) {
 		}
 
 		if strings.ToUpper(w.Op) == "IN" {
-			placeholders := strings.Repeat("?,", len(w.Value.([]any)))
-			placeholders = placeholders[:len(placeholders)-1]
-			query += fmt.Sprintf("%v%v IN (%v)", indent, w.Name, placeholders)
-			value = append(value, w.Value.([]any)...)
+			rv := reflect.ValueOf(w.Value)
+			if rv.Kind() == reflect.Slice {
+				placeholders := strings.Repeat("?,", rv.Len())
+				placeholders = placeholders[:len(placeholders)-1]
+				query += fmt.Sprintf("%v%v IN (%v)", indent, w.Name, placeholders)
+				for j := 0; j < rv.Len(); j++ {
+					value = append(value, rv.Index(j).Interface())
+				}
+			}
 			continue
 		}
 
