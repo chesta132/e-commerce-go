@@ -55,6 +55,19 @@ func (h *Product) SearchByKeyword(c echo.Context) error {
 	return rp.Success(products).PaginateCursor(config.PAGINATION_LIMIT, offset).OkJSON()
 }
 
+func (h *Product) GetOne(c echo.Context) error {
+	svc := h.svc.AttachEcho(c)
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	id := c.Param("id")
+
+	product, err := svc.FindById(id)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	return rp.Success(product).OkJSON()
+}
+
 func (h *Product) CreateOne(c echo.Context) error {
 	svc := h.svc.AttachEcho(c)
 	rp := replylib.Client.New(adapter.AdaptEcho(c))

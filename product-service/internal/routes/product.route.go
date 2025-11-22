@@ -14,8 +14,10 @@ func (rt *Route) RegisterProduct(group *echo.Group) {
 	ps := service.NewProduct(pr)
 	ph := handler.NewProduct(ps)
 
-	group.GET("/search", ph.SearchByKeyword)
 	group.POST("", middleware.AdminOnly(ph.CreateOne))
+
+	group.GET("/search", ph.SearchByKeyword)
+	group.GET("/:id", ph.GetOne)
 	group.PUT("/:id", middleware.AdminOnly(ph.UpdateOne))
 	group.DELETE("/:id", middleware.AdminOnly(ph.DeleteOne))
 
