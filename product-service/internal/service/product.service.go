@@ -87,3 +87,13 @@ func (s *EchoProduct) FindByIdWithRelation(id string, relations []string) (model
 	}
 	return product, q.First(&product).Error
 }
+
+func (s *EchoProduct) FindByCategoryIds(ids []string) ([]model.Product, error) {
+	var products []model.Product
+	err := s.pr.DB().Joins("JOIN product_categories pc ON pc.product_id = products.id").
+		Where("pc.category_id IN ?", ids).
+		Preload("Categories").
+		Preload("Previews").
+		Find(&products).Error
+	return products, err
+}

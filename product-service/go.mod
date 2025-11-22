@@ -3,19 +3,20 @@ module product-service
 go 1.25.0
 
 require (
-	github.com/chesta132/e-commerce-go/shared v0.0.0-20251120124548-4922fa926195
+	github.com/chesta132/e-commerce-go/shared v0.0.0-20251122045459-ecfdedf996de
 	github.com/chesta132/goreply v0.0.7
 	github.com/chesta132/goreply/adapter/echo v0.0.0-20251113152508-e05e5b4010bd
+	github.com/disintegration/imaging v1.6.2
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.13.4
+	github.com/u2takey/ffmpeg-go v0.5.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 )
 
 require (
 	github.com/aws/aws-sdk-go v1.55.8 // indirect
-	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -30,7 +31,6 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/u2takey/ffmpeg-go v0.5.0 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect

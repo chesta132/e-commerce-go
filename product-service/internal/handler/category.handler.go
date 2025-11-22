@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/replylib"
 	"product-service/internal/lib/validatorlib"
@@ -15,11 +16,12 @@ import (
 )
 
 type Category struct {
-	svc *service.Category
+	svc  *service.Category
+	psvc *service.Product
 }
 
-func NewCategory(service *service.Category) *Category {
-	return &Category{service}
+func NewCategory(service *service.Category, psvc *service.Product) *Category {
+	return &Category{service, psvc}
 }
 
 func (h *Category) CreateOne(c echo.Context) error {
@@ -54,3 +56,47 @@ func (h *Category) GetOne(c echo.Context) error {
 
 	return rp.Success(cat).OkJSON()
 }
+
+func (h *Category) UpdateOne(c echo.Context) error {
+	svc := h.svc.AttachEcho(c)
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	id := c.Param("id")
+	var update model.Category
+	if err := c.Bind(&update); err != nil {
+		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
+	}
+
+	err := svc.UpdateById(id, update)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	cat, err := svc.FindById(id)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	return rp.Success(cat).OkJSON()
+}
+
+	func (h *Category) DeleteOne(c echo.Context) error {
+		svc := h.svc.AttachEcho(c)
+		psvc := h.psvc.AttachEcho(c)
+		rp := replylib.Client.New(adapter.AdaptEcho(c))
+		id := c.Param("id")
+
+		prod, err := psvc.FindByCategoryIds([]string{id})
+		if err != nil {
+			return errorlib.HandleQueryError(err, rp)
+		}
+		if len(prod) > 0 {
+			return rp.Error(sreplylib.CodeConflict, fmt.Sprintf("%d product(s) still associated with this category", len(prod))).FailJSON()
+		}
+
+		err = svc.DeleteById(id)
+		if err != nil {
+			return errorlib.HandleQueryError(err, rp)
+		}
+
+		return rp.Success(map[string]string{"id": id}).OkJSON()
+	}

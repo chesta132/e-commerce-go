@@ -4,6 +4,7 @@ import (
 	"context"
 	"product-service/internal/model"
 
+	"github.com/chesta132/e-commerce-go/shared/squery"
 	"gorm.io/gorm"
 )
 
@@ -33,4 +34,16 @@ func (r *Category) FindManyByIds(ctx context.Context, ids []string) ([]model.Cat
 
 func (r *Category) FindById(ctx context.Context, id string) (model.Category, error) {
 	return gorm.G[model.Category](r.db).Where("id = ?", id).First(ctx)
+}
+
+func (r *Category) UpdateOne(ctx context.Context, where []squery.Where, update model.Category) error {
+	q, v := squery.BuildWhere(where)
+	_, err := gorm.G[model.Category](r.db).Where(q, v...).Updates(ctx, update)
+	return err
+}
+
+func (r *Category) DeleteOne(ctx context.Context, where []squery.Where) error {
+	q, v := squery.BuildWhere(where)
+	_, err := gorm.G[model.Category](r.db).Where(q, v...).Delete(ctx)
+	return err
 }

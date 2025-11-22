@@ -83,7 +83,7 @@ func (h *Preview) CreateOne(c echo.Context) error {
 	meta := previewlib.GeneratePreview(fh, alt, prodId, true)
 	err = svc.CreatePreviewWithFile(meta, fbyte)
 	if err != nil {
-		return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
+		return errorlib.HandleQueryError(err, rp)
 	}
 
 	return rp.Success(meta).CreatedJSON()
@@ -111,7 +111,9 @@ func (h *Preview) UpdateOne(c echo.Context) error {
 		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 	alt := c.FormValue("alt")
-	meta.Alt = alt
+	if alt != "" {
+		meta.Alt = alt
+	}
 	previewlib.MergePreview(fh, &meta)
 
 	b, err := svc.ResizePreview(fh)
@@ -119,7 +121,7 @@ func (h *Preview) UpdateOne(c echo.Context) error {
 		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 
-	err = svc.UpdatePreviewWithFile(&meta, b)
+	err = svc.UpdatePreviewWithFile(meta, b)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
@@ -140,7 +142,7 @@ func (h *Preview) DeleteOne(c echo.Context) error {
 
 	err = svc.DeletePreviewWithFile(id, prodId)
 	if err != nil {
-		return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
+		return errorlib.HandleQueryError(err, rp)
 	}
 
 	return rp.Success(map[string]string{"id": id}).OkJSON()

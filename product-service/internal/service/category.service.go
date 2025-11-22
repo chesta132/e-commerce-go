@@ -6,6 +6,7 @@ import (
 	"product-service/internal/model"
 	"product-service/internal/repo"
 
+	"github.com/chesta132/e-commerce-go/shared/squery"
 	"github.com/labstack/echo/v4"
 )
 
@@ -38,4 +39,12 @@ func (s *EchoCategory) CreateOne(payload model.CreateCategoryPayload) (model.Cat
 
 func (s *EchoCategory) FindById(id string) (model.Category, error) {
 	return s.cr.FindById(s.ctx, id)
+}
+
+func (s *EchoCategory) UpdateById(id string, update model.Category) error {
+	return s.cr.UpdateOne(s.ctx, []squery.Where{{Name: "id", Value: id}}, update)
+}
+
+func (s *EchoCategory) DeleteById(id string) error {
+	return s.cr.DeleteOne(s.ctx, []squery.Where{{Name: "id", Value: id}})
 }

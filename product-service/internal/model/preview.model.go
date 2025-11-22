@@ -13,6 +13,6 @@ type Preview struct {
 	Path      string `json:"-"`
 
 	ProductId string    `json:"productId"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }

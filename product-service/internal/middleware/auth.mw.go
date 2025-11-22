@@ -14,7 +14,8 @@ func AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 		rp := replylib.Client.New(adapter.AdaptEcho(c))
 		admin, cookie, err := userlib.GetUserData(c.Cookies(), "/user/admin")
 		if err != nil {
-			return rp.Error(sreplylib.CodeBadGateway, err.Error()).FailJSON()
+			erru := err.(userlib.GetUserError)
+			return rp.Error(sreplylib.GetCodeByStatus(erru.Status), erru.Error()).FailJSON(erru.Status)
 		}
 		if cookie != "" {
 			rp.AddHeader("Set-Cookie", cookie)
