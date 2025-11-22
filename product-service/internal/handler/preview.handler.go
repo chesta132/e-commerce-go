@@ -105,6 +105,7 @@ func (h *Preview) UpdateOne(c echo.Context) error {
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
+	oldMeta := meta
 
 	fh, err := c.FormFile("file")
 	if err != nil {
@@ -121,7 +122,7 @@ func (h *Preview) UpdateOne(c echo.Context) error {
 		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
 	}
 
-	err = svc.UpdatePreviewWithFile(meta, b)
+	err = svc.UpdatePreviewWithFile(oldMeta, meta, b)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}

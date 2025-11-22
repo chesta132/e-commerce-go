@@ -60,11 +60,12 @@ func (s *EchoPreview) GetPreviewFile(id, prodId string) (model.Preview, []byte, 
 	return preview, content, nil
 }
 
-func (s *EchoPreview) UpdatePreviewWithFile(preview model.Preview, content []byte) error {
-	if err := s.tr.WriteFile(preview.Path, content); err != nil {
+func (s *EchoPreview) UpdatePreviewWithFile(old, new model.Preview, content []byte) error {
+	if err := s.tr.UpdateOne(s.ctx, []squery.Where{{Name: "id", Value: new.ID}}, new); err != nil {
 		return err
 	}
-	return s.tr.UpdateOne(s.ctx, []squery.Where{{Name: "id", Value: preview.ID}}, preview)
+	s.tr.DeleteFile(old.Path)
+	return s.tr.WriteFile(new.Path, content)
 }
 
 func (s *EchoPreview) DeletePreviewWithFile(id, prodId string) error {
