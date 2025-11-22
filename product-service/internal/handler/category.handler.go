@@ -37,7 +37,7 @@ func (h *Category) CreateOne(c echo.Context) error {
 
 	cat, err := svc.CreateOne(payload)
 	if err != nil {
-		return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
+		return errorlib.HandleQueryError(err, rp)
 	}
 
 	return rp.Success(cat).CreatedJSON()
@@ -50,7 +50,7 @@ func (h *Category) GetOne(c echo.Context) error {
 
 	cat, err := svc.FindById(id)
 	if err != nil {
-		return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
+		return errorlib.HandleQueryError(err, rp)
 	}
 
 	return rp.Success(cat).OkJSON()
@@ -83,7 +83,7 @@ func (h *Category) DeleteOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	id := c.Param("id")
 
-	prod, err := svc.FindProductByCategoryIds([]string{id})
+	prod, err := svc.FindProductsByCategoryIds([]string{id})
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}

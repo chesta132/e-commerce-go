@@ -28,12 +28,14 @@ func (r *Category) CreateMany(ctx context.Context, categories *[]model.Category)
 	return r.db.WithContext(ctx).Create(categories).Error
 }
 
-func (r *Category) FindManyByIds(ctx context.Context, ids []string) ([]model.Category, error) {
-	return gorm.G[model.Category](r.db).Where("id IN ?", ids).Find(ctx)
+func (r *Category) FindMany(ctx context.Context, where []squery.Where) ([]model.Category, error) {
+	q, v := squery.BuildWhere(where)
+	return gorm.G[model.Category](r.db).Where(q, v...).Find(ctx)
 }
 
-func (r *Category) FindById(ctx context.Context, id string) (model.Category, error) {
-	return gorm.G[model.Category](r.db).Where("id = ?", id).First(ctx)
+func (r *Category) FindFirst(ctx context.Context, where []squery.Where) (model.Category, error) {
+	q, v := squery.BuildWhere(where)
+	return gorm.G[model.Category](r.db).Where(q, v...).First(ctx)
 }
 
 func (r *Category) UpdateOne(ctx context.Context, where []squery.Where, update model.Category) error {
@@ -48,7 +50,7 @@ func (r *Category) DeleteOne(ctx context.Context, where []squery.Where) error {
 	return err
 }
 
-func (s *Category) FindProductByCategoryIds(ids []string) ([]model.Product, error) {
+func (s *Category) FindProductsByCategoryIds(ids []string) ([]model.Product, error) {
 	var products []model.Product
 	err := s.db.Joins("JOIN product_categories pc ON pc.product_id = products.id").
 		Where("pc.category_id IN ?", ids).

@@ -54,7 +54,7 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		cr := repo.NewCategory(tx)
-		existingCat, err := cr.FindManyByIds(s.ctx, payload.CategoryIds)
+		existingCat, err := cr.FindMany(s.ctx, []squery.Where{{Name: "id", Value: payload.CategoryIds, Op: "IN"}})
 		if err != nil {
 			return err
 		}
@@ -100,15 +100,4 @@ func (s *EchoProduct) DeleteById(id string) error {
 		return err
 	}
 	return os.Remove(previewlib.GetDirPath(id))
-}
-
-func (s *EchoProduct) DeleteCategories(id string, catIds []string) error {
-	prod, err := s.FindByIdWithRelation(id, []string{"Categories"})
-	if err != nil {
-		return err
-	}
-	if len(prod.Categories) <= len(catIds) {
-		return errorlib.ErrCantDeleteAllCategories
-	}
-	return s.pr.DeleteCategories(s.ctx, id, catIds)
 }

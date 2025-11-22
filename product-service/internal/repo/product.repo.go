@@ -107,16 +107,3 @@ func (r *Product) DeleteOne(ctx context.Context, where []squery.Where) error {
 	_, err := gorm.G[model.Product](r.db).Where(q, v...).Delete(ctx)
 	return err
 }
-
-func (r *Product) DeleteCategories(ctx context.Context, id string, catIds []string) error {
-	product := model.Product{ID: id}
-	var categories []model.Category
-	for _, id := range catIds {
-		categories = append(categories, model.Category{ID: id})
-	}
-
-	return r.db.
-		Model(&product).
-		Association("Categories").
-		Delete(&categories)
-}

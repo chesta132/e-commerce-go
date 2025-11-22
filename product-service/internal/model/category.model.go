@@ -15,3 +15,8 @@ type CreateCategoryPayload struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
 }
+
+type UpdateCategoryRelationPayload struct {
+	Add    []string `json:"add" validate:"required"`
+	Remove []string `json:"remove" validate:"required"`
+}

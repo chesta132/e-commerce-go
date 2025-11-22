@@ -49,7 +49,7 @@ func (h *Product) SearchByKeyword(c echo.Context) error {
 		return rp.Error(sreplylib.CodeServerError, err.Error()).FailJSON()
 	}
 	if len(nfCatIds) > 0 {
-		rp.Info(fmt.Sprintf("Category(s) with id (%s) not found", strings.Join(nfCatIds, " | ")))
+		rp.Info(fmt.Sprintf("Category(s) with id [%s] not found", strings.Join(nfCatIds, ", ")))
 	}
 
 	return rp.Success(products).PaginateCursor(config.PAGINATION_LIMIT, offset).OkJSON()
@@ -60,7 +60,7 @@ func (h *Product) GetOne(c echo.Context) error {
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	id := c.Param("id")
 
-	product, err := svc.FindById(id)
+	product, err := svc.FindByIdWithRelation(id, []string{"Meta"})
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}

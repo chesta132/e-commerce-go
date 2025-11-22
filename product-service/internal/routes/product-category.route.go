@@ -18,5 +18,6 @@ func (rt *Route) RegisterProductCategory(group *echo.Group) {
 
 	h := handler.NewProductCategory(ps, cs)
 
-	group.DELETE("", middleware.AdminOnly(h.DeleteCategories))
+	group.GET("", h.GetCategories)
+	group.PUT("", middleware.AdminOnly(h.UpdateCategoryRelations))
 }

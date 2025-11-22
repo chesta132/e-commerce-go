@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"errors"
+	"fmt"
 	"product-service/internal/lib/errorlib"
 	"product-service/internal/lib/replylib"
 	"product-service/internal/lib/validatorlib"
 	"product-service/internal/model"
 	"product-service/internal/service"
+	"strings"
 
 	"github.com/chesta132/e-commerce-go/shared/sreplylib"
 	adapter "github.com/chesta132/goreply/adapter/echo"
@@ -24,11 +25,24 @@ func NewProductCategory(psvc *service.Product, csvc *service.Category) *ProductC
 	return &ProductCategory{psvc, csvc}
 }
 
-func (h *ProductCategory) DeleteCategories(c echo.Context) error {
-	psvc := h.psvc.AttachEcho(c)
+func (h *ProductCategory) GetCategories(c echo.Context) error {
+	csvc := h.csvc.AttachEcho(c)
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	prodId := c.Param("prod-id")
-	var payload model.DeleteCategoryRelationPayload
+
+	categories, err := csvc.FindCategoriesByProductId(prodId)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	return rp.Success(categories).OkJSON()
+}
+
+func (h *ProductCategory) UpdateCategoryRelations(c echo.Context) error {
+	csvc := h.csvc.AttachEcho(c)
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	prodId := c.Param("prod-id")
+	var payload model.UpdateCategoryRelationPayload
 	if err := c.Bind(&payload); err != nil {
 		return rp.Error(sreplylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
@@ -36,13 +50,18 @@ func (h *ProductCategory) DeleteCategories(c echo.Context) error {
 		return errorlib.HandleValidateError(err.(validator.ValidationErrors), rp)
 	}
 
-	err := psvc.DeleteCategories(prodId, payload.CatIds)
-	if errors.Is(err, errorlib.ErrCantDeleteAllCategories) {
-		return rp.Error(sreplylib.CodeConflict, err.Error()).FailJSON()
+	nfIds, err := csvc.UpdateCategoryRelations(prodId, payload.Add, payload.Remove)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
 	}
+	categories, err := csvc.FindCategoriesByProductId(prodId)
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}
 
-	return rp.Success(map[string][]string{"ids": payload.CatIds}).OkJSON()
+	if len(nfIds) > 0 {
+		rp.Info(fmt.Sprintf("Category(s) with id [%s] not found", strings.Join(nfIds, ", ")))
+	}
+
+	return rp.Success(categories).OkJSON()
 }
