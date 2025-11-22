@@ -47,3 +47,12 @@ func (r *Category) DeleteOne(ctx context.Context, where []squery.Where) error {
 	_, err := gorm.G[model.Category](r.db).Where(q, v...).Delete(ctx)
 	return err
 }
+
+func (s *Category) FindProductByCategoryIds(ids []string) ([]model.Product, error) {
+	var products []model.Product
+	err := s.db.Joins("JOIN product_categories pc ON pc.product_id = products.id").
+		Where("pc.category_id IN ?", ids).
+		Preload("Categories").
+		Find(&products).Error
+	return products, err
+}

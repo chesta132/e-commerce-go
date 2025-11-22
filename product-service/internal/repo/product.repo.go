@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"product-service/internal/lib/productlib"
 	"product-service/internal/model"
 	"strings"
 
@@ -52,12 +51,6 @@ func (r *Product) SearchByKeyword(ctx context.Context, keyword string, opt Searc
 
 	query := r.db.
 		Preload("Meta").
-		Preload("Categories", func(tx *gorm.DB) *gorm.DB {
-			return tx.Select("id")
-		}).
-		Preload("Previews", func(tx *gorm.DB) *gorm.DB {
-			return tx.Select("id", "product_id")
-		}).
 		Table("(?) as sub", subQuery).
 		Where("rank > 0.2")
 
@@ -90,10 +83,6 @@ func (r *Product) SearchByKeyword(ctx context.Context, keyword string, opt Searc
 		Offset(opt.Offset).
 		Limit(opt.Limit).
 		Find(&products).Error
-
-	for i := range products {
-		productlib.MoveRelationIdToFlat(&products[i])
-	}
 
 	return products, notFoundCatIds, err
 }
@@ -130,14 +119,4 @@ func (r *Product) DeleteCategories(ctx context.Context, id string, catIds []stri
 		Model(&product).
 		Association("Categories").
 		Delete(&categories)
-}
-
-func (s *Product) FindByCategoryIds(ids []string) ([]model.Product, error) {
-	var products []model.Product
-	err := s.db.Joins("JOIN product_categories pc ON pc.product_id = products.id").
-		Where("pc.category_id IN ?", ids).
-		Preload("Categories").
-		Preload("Previews").
-		Find(&products).Error
-	return products, err
 }

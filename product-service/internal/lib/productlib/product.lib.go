@@ -31,7 +31,8 @@ func FilterMetaToCreate(payload *model.CreateProductPayload) *model.ProductMeta 
 }
 
 func GenerateSKU(category, name string) string {
-	prefixCat := strings.ToUpper(category[:4])
+	cleanCat := strings.ToUpper(strings.ReplaceAll(category, " ", ""))
+	prefixCat := cleanCat[:4]
 	cleanName := strings.ToUpper(strings.ReplaceAll(name, " ", ""))
 	if len(cleanName) > 5 {
 		cleanName = cleanName[:5]
@@ -40,19 +41,4 @@ func GenerateSKU(category, name string) string {
 	randPart := strings.ToUpper(scrypto.RandomString(4))
 
 	return fmt.Sprintf("%s-%s-%s", prefixCat, cleanName, randPart)
-}
-
-func AddRelationIdToFlat(product *model.Product) {
-	for _, p := range product.Previews {
-		product.PreviewIds = append(product.PreviewIds, p.ID)
-	}
-	for _, c := range product.Categories {
-		product.CategoryIds = append(product.CategoryIds, c.ID)
-	}
-}
-
-func MoveRelationIdToFlat(product *model.Product) {
-	AddRelationIdToFlat(product)
-	product.Previews = nil
-	product.Categories = nil
 }

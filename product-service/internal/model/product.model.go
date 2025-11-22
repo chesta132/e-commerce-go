@@ -9,20 +9,17 @@ type Product struct {
 	Name         string `gorm:"index" json:"name"`
 	Description  string `gorm:"index" json:"description"`
 	SearchVector string `gorm:"type:tsvector;->" json:"-"`
-	SKU          string `gorm:"unique"`
+	SKU          string `gorm:"unique" json:"SKU,omitempty"`
 
-	MetaId string      `gorm:"unique" json:"metaId"`
+	MetaId string      `gorm:"unique" json:"-"`
 	Meta   ProductMeta `gorm:"foreignKey:MetaId;constraint:OnDelete:CASCADE" json:"meta,omitzero"`
 
-	Previews   []Preview  `gorm:"constraint:OnDelete:CASCADE" json:"previews,omitempty"`
-	Categories []Category `gorm:"many2many:product_categories" json:"categories,omitempty"`
+	Previews   []Preview  `gorm:"constraint:OnDelete:CASCADE" json:"-"`
+	Categories []Category `gorm:"many2many:product_categories" json:"-"`
 	AdminId    string     `json:"adminId" gorm:"index"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
-
-	PreviewIds  []string `json:"previewIds,omitempty" gorm:"-"`
-	CategoryIds []string `json:"categoryIds,omitempty" gorm:"-"`
 }
 
 type ProductMeta struct {
@@ -30,9 +27,9 @@ type ProductMeta struct {
 	Price         int    `json:"price"`
 	Currency      string `json:"currency"`
 	TotalQuantity int    `json:"quantity"`
-	TotalReserved int    `json:"reserved"`
+	TotalReserved int    `json:"reserved,omitempty"`
 
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"-"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }
 

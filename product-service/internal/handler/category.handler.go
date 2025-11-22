@@ -16,12 +16,11 @@ import (
 )
 
 type Category struct {
-	svc  *service.Category
-	psvc *service.Product
+	svc *service.Category
 }
 
-func NewCategory(service *service.Category, psvc *service.Product) *Category {
-	return &Category{service, psvc}
+func NewCategory(service *service.Category) *Category {
+	return &Category{service}
 }
 
 func (h *Category) CreateOne(c echo.Context) error {
@@ -81,11 +80,10 @@ func (h *Category) UpdateOne(c echo.Context) error {
 
 func (h *Category) DeleteOne(c echo.Context) error {
 	svc := h.svc.AttachEcho(c)
-	psvc := h.psvc.AttachEcho(c)
 	rp := replylib.Client.New(adapter.AdaptEcho(c))
 	id := c.Param("id")
 
-	prod, err := psvc.FindByCategoryIds([]string{id})
+	prod, err := svc.FindProductByCategoryIds([]string{id})
 	if err != nil {
 		return errorlib.HandleQueryError(err, rp)
 	}

@@ -48,3 +48,7 @@ func (s *EchoCategory) UpdateById(id string, update model.Category) error {
 func (s *EchoCategory) DeleteById(id string) error {
 	return s.cr.DeleteOne(s.ctx, []squery.Where{{Name: "id", Value: id}})
 }
+
+func (s *EchoCategory) FindProductByCategoryIds(ids []string) ([]model.Product, error) {
+	return s.cr.FindProductByCategoryIds(ids)
+}

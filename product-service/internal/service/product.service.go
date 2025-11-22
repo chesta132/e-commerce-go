@@ -74,7 +74,6 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		pr := repo.NewProduct(tx)
 		return pr.CreateOne(s.ctx, data)
 	})
-	productlib.MoveRelationIdToFlat(data)
 	return data, err
 }
 
@@ -101,10 +100,6 @@ func (s *EchoProduct) DeleteById(id string) error {
 		return err
 	}
 	return os.Remove(previewlib.GetDirPath(id))
-}
-
-func (s *EchoProduct) FindByCategoryIds(ids []string) ([]model.Product, error) {
-	return s.pr.FindByCategoryIds(ids)
 }
 
 func (s *EchoProduct) DeleteCategories(id string, catIds []string) error {
