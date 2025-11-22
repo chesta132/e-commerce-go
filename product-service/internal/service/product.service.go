@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"os"
 	"product-service/config"
 	"product-service/internal/lib/errorlib"
+	"product-service/internal/lib/previewlib"
 	"product-service/internal/lib/productlib"
 	"product-service/internal/lib/validatorlib"
 	"product-service/internal/model"
@@ -88,12 +90,29 @@ func (s *EchoProduct) FindByIdWithRelation(id string, relations []string) (model
 	return product, q.First(&product).Error
 }
 
+func (s *EchoProduct) UpdateByid(id string, update model.Product) error {
+	return s.pr.UpdateOne(s.ctx, []squery.Where{{Name: "id", Value: id}}, update)
+}
+
+func (s *EchoProduct) DeleteById(id string) error {
+	err := s.pr.DeleteOne(s.ctx, []squery.Where{{Name: "id", Value: id}})
+	if err != nil {
+		return err
+	}
+	return os.Remove(previewlib.GetDirPath(id))
+}
+
 func (s *EchoProduct) FindByCategoryIds(ids []string) ([]model.Product, error) {
-	var products []model.Product
-	err := s.pr.DB().Joins("JOIN product_categories pc ON pc.product_id = products.id").
-		Where("pc.category_id IN ?", ids).
-		Preload("Categories").
-		Preload("Previews").
-		Find(&products).Error
-	return products, err
+	return s.pr.FindByCategoryIds(ids)
+}
+
+func (s *EchoProduct) DeleteCategories(id string, catIds []string) error {
+	prod, err := s.FindByIdWithRelation(id, []string{"Categories"})
+	if err != nil {
+		return err
+	}
+	if len(prod.Categories) <= len(catIds) {
+		return errorlib.ErrCantDeleteAllCategories
+	}
+	return s.pr.DeleteCategories(s.ctx, id, catIds)
 }

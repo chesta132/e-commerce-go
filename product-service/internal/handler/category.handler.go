@@ -63,7 +63,7 @@ func (h *Category) UpdateOne(c echo.Context) error {
 	id := c.Param("id")
 	var update model.Category
 	if err := c.Bind(&update); err != nil {
-		return rp.Error(sreplylib.CodeBadRequest, err.Error()).FailJSON()
+		return rp.Error(sreplylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
 	}
 
 	err := svc.UpdateById(id, update)
@@ -79,24 +79,24 @@ func (h *Category) UpdateOne(c echo.Context) error {
 	return rp.Success(cat).OkJSON()
 }
 
-	func (h *Category) DeleteOne(c echo.Context) error {
-		svc := h.svc.AttachEcho(c)
-		psvc := h.psvc.AttachEcho(c)
-		rp := replylib.Client.New(adapter.AdaptEcho(c))
-		id := c.Param("id")
+func (h *Category) DeleteOne(c echo.Context) error {
+	svc := h.svc.AttachEcho(c)
+	psvc := h.psvc.AttachEcho(c)
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	id := c.Param("id")
 
-		prod, err := psvc.FindByCategoryIds([]string{id})
-		if err != nil {
-			return errorlib.HandleQueryError(err, rp)
-		}
-		if len(prod) > 0 {
-			return rp.Error(sreplylib.CodeConflict, fmt.Sprintf("%d product(s) still associated with this category", len(prod))).FailJSON()
-		}
-
-		err = svc.DeleteById(id)
-		if err != nil {
-			return errorlib.HandleQueryError(err, rp)
-		}
-
-		return rp.Success(map[string]string{"id": id}).OkJSON()
+	prod, err := psvc.FindByCategoryIds([]string{id})
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
 	}
+	if len(prod) > 0 {
+		return rp.Error(sreplylib.CodeConflict, fmt.Sprintf("%d product(s) still associated with this category", len(prod))).FailJSON()
+	}
+
+	err = svc.DeleteById(id)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	return rp.Success(map[string]string{"id": id}).OkJSON()
+}

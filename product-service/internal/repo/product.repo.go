@@ -96,3 +96,38 @@ func (r *Product) FindFirst(ctx context.Context, where []squery.Where) (model.Pr
 	q, v := squery.BuildWhere(where)
 	return gorm.G[model.Product](r.db).Where(q, v...).First(ctx)
 }
+
+func (r *Product) UpdateOne(ctx context.Context, where []squery.Where, update model.Product) error {
+	q, v := squery.BuildWhere(where)
+	_, err := gorm.G[model.Product](r.db).Where(q, v...).Updates(ctx, update)
+	return err
+}
+
+func (r *Product) DeleteOne(ctx context.Context, where []squery.Where) error {
+	q, v := squery.BuildWhere(where)
+	_, err := gorm.G[model.Product](r.db).Where(q, v...).Delete(ctx)
+	return err
+}
+
+func (r *Product) DeleteCategories(ctx context.Context, id string, catIds []string) error {
+	product := model.Product{ID: id}
+	var categories []model.Category
+	for _, id := range catIds {
+		categories = append(categories, model.Category{ID: id})
+	}
+
+	return r.db.
+		Model(&product).
+		Association("Categories").
+		Delete(&categories)
+}
+
+func (s *Product) FindByCategoryIds(ids []string) ([]model.Product, error) {
+	var products []model.Product
+	err := s.db.Joins("JOIN product_categories pc ON pc.product_id = products.id").
+		Where("pc.category_id IN ?", ids).
+		Preload("Categories").
+		Preload("Previews").
+		Find(&products).Error
+	return products, err
+}

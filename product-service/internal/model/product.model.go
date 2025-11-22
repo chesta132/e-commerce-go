@@ -40,3 +40,7 @@ type CreateProductPayload struct {
 	Currency    string   `json:"currency" validate:"required"`
 	CategoryIds []string `json:"categoryIds" validate:"required"`
 }
+
+type DeleteCategoryRelationPayload struct {
+	CatIds []string `json:"categoryIds" validate:"required"`
+}

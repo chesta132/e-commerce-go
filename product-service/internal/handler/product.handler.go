@@ -72,3 +72,40 @@ func (h *Product) CreateOne(c echo.Context) error {
 	}
 	return rp.Success(product).CreatedJSON()
 }
+
+func (h *Product) UpdateOne(c echo.Context) error {
+	svc := h.svc.AttachEcho(c)
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	id := c.Param("id")
+
+	var update model.Product
+	if err := c.Bind(&update); err != nil {
+		return rp.Error(sreplylib.CodeBadRequest, "payload: invalid request body", reply.OptErrorPayload{Details: err.Error()}).FailJSON()
+	}
+	update.SKU = ""
+
+	err := svc.UpdateByid(id, update)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	product, err := svc.FindById(id)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	return rp.Success(product).OkJSON()
+}
+
+func (h *Product) DeleteOne(c echo.Context) error {
+	svc := h.svc.AttachEcho(c)
+	rp := replylib.Client.New(adapter.AdaptEcho(c))
+	id := c.Param("id")
+
+	err := svc.DeleteById(id)
+	if err != nil {
+		return errorlib.HandleQueryError(err, rp)
+	}
+
+	return rp.Success(map[string]string{"id": id}).OkJSON()
+}
