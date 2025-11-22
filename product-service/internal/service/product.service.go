@@ -74,6 +74,7 @@ func (s *EchoProduct) CreateProduct(payload *model.CreateProductPayload, admin *
 		pr := repo.NewProduct(tx)
 		return pr.CreateOne(s.ctx, data)
 	})
+	productlib.MoveRelationIdToFlat(data)
 	return data, err
 }
 

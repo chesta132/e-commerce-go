@@ -12,7 +12,7 @@ type Preview struct {
 	Mime      string `json:"mime"`
 	Path      string `json:"-"`
 
-	ProductId string    `json:"productId"`
+	ProductId string    `gorm:"index" json:"productId"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }

@@ -14,12 +14,15 @@ type Product struct {
 	MetaId string      `gorm:"unique" json:"metaId"`
 	Meta   ProductMeta `gorm:"foreignKey:MetaId;constraint:OnDelete:CASCADE" json:"meta,omitzero"`
 
-	Previews   []Preview  `gorm:"constraint:OnDelete:CASCADE;" json:"previews,omitempty"`
+	Previews   []Preview  `gorm:"constraint:OnDelete:CASCADE" json:"previews,omitempty"`
 	Categories []Category `gorm:"many2many:product_categories" json:"categories,omitempty"`
 	AdminId    string     `json:"adminId" gorm:"index"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
+
+	PreviewIds  []string `json:"previewIds,omitempty" gorm:"-"`
+	CategoryIds []string `json:"categoryIds,omitempty" gorm:"-"`
 }
 
 type ProductMeta struct {

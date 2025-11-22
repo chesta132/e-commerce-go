@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"product-service/internal/lib/productlib"
 	"product-service/internal/model"
 	"strings"
 
@@ -51,7 +52,12 @@ func (r *Product) SearchByKeyword(ctx context.Context, keyword string, opt Searc
 
 	query := r.db.
 		Preload("Meta").
-		Preload("Categories").
+		Preload("Categories", func(tx *gorm.DB) *gorm.DB {
+			return tx.Select("id")
+		}).
+		Preload("Previews", func(tx *gorm.DB) *gorm.DB {
+			return tx.Select("id", "product_id")
+		}).
 		Table("(?) as sub", subQuery).
 		Where("rank > 0.2")
 
@@ -84,6 +90,10 @@ func (r *Product) SearchByKeyword(ctx context.Context, keyword string, opt Searc
 		Offset(opt.Offset).
 		Limit(opt.Limit).
 		Find(&products).Error
+
+	for i := range products {
+		productlib.MoveRelationIdToFlat(&products[i])
+	}
 
 	return products, notFoundCatIds, err
 }

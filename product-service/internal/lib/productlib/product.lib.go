@@ -41,3 +41,18 @@ func GenerateSKU(category, name string) string {
 
 	return fmt.Sprintf("%s-%s-%s", prefixCat, cleanName, randPart)
 }
+
+func AddRelationIdToFlat(product *model.Product) {
+	for _, p := range product.Previews {
+		product.PreviewIds = append(product.PreviewIds, p.ID)
+	}
+	for _, c := range product.Categories {
+		product.CategoryIds = append(product.CategoryIds, c.ID)
+	}
+}
+
+func MoveRelationIdToFlat(product *model.Product) {
+	AddRelationIdToFlat(product)
+	product.Previews = nil
+	product.Categories = nil
+}

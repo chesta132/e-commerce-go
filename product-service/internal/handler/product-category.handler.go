@@ -44,10 +44,5 @@ func (h *ProductCategory) DeleteCategories(c echo.Context) error {
 		return errorlib.HandleQueryError(err, rp)
 	}
 
-	product, err := psvc.FindByIdWithRelation(prodId, []string{"Categories"})
-	if err != nil {
-		return errorlib.HandleQueryError(err, rp)
-	}
-
-	return rp.Success(product).OkJSON()
+	return rp.Success(map[string][]string{"ids": payload.CatIds}).OkJSON()
 }
